@@ -1,22 +1,37 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Liaison West Automobiles API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: cars
+    description: Car listings
+  - name: users
+    description: User management
+  - name: agents
+    description: Agent management
+  - name: loans
+    description: Loan applications
+  - name: cart
+    description: Shopping cart
+  - name: orders
+    description: Orders
+  - name: admin
+    description: Admin operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +39,847 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # AUTH
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegisterInput"
+      responses:
+        "201":
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/agent-login:
+    post:
+      operationId: loginAgent
+      tags: [auth]
+      summary: Agent login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Agent logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/admin-login:
+    post:
+      operationId: loginAdmin
+      tags: [auth]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Admin logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # CARS
+  /cars:
+    get:
+      operationId: listCars
+      tags: [cars]
+      summary: List all cars
+      parameters:
+        - name: make
+          in: query
+          schema:
+            type: string
+        - name: model
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: minYear
+          in: query
+          schema:
+            type: integer
+        - name: maxYear
+          in: query
+          schema:
+            type: integer
+        - name: condition
+          in: query
+          schema:
+            type: string
+            enum: [new, used, certified]
+        - name: bodyType
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of cars
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarListResponse"
+    post:
+      operationId: createCar
+      tags: [cars]
+      summary: Create a car listing (agent/admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarInput"
+      responses:
+        "201":
+          description: Car created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+
+  /cars/featured:
+    get:
+      operationId: getFeaturedCars
+      tags: [cars]
+      summary: Get featured cars for homepage
+      responses:
+        "200":
+          description: Featured cars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Car"
+
+  /cars/stats:
+    get:
+      operationId: getCarStats
+      tags: [cars]
+      summary: Get car inventory stats
+      responses:
+        "200":
+          description: Car statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarStats"
+
+  /cars/{id}:
+    get:
+      operationId: getCar
+      tags: [cars]
+      summary: Get car by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Car details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateCar
+      tags: [cars]
+      summary: Update car (agent/admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarUpdate"
+      responses:
+        "200":
+          description: Updated car
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Car"
+    delete:
+      operationId: deleteCar
+      tags: [cars]
+      summary: Delete car (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /cars/{id}/similar:
+    get:
+      operationId: getSimilarCars
+      tags: [cars]
+      summary: Get similar cars
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Similar cars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Car"
+
+  # USERS
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (admin)
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}/location:
+    patch:
+      operationId: updateUserLocation
+      tags: [users]
+      summary: Update user location
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocationInput"
+      responses:
+        "200":
+          description: Location updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}/verify:
+    post:
+      operationId: verifyUserIdentity
+      tags: [users]
+      summary: Submit identity verification documents
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerificationInput"
+      responses:
+        "200":
+          description: Verification submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # AGENTS
+  /agents:
+    get:
+      operationId: listAgents
+      tags: [agents]
+      summary: List all agents (admin)
+      responses:
+        "200":
+          description: Agents list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Agent"
+    post:
+      operationId: createAgent
+      tags: [agents]
+      summary: Create an agent (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentInput"
+      responses:
+        "201":
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+
+  /agents/{id}:
+    get:
+      operationId: getAgent
+      tags: [agents]
+      summary: Get agent by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+    patch:
+      operationId: updateAgent
+      tags: [agents]
+      summary: Update agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentUpdate"
+      responses:
+        "200":
+          description: Updated agent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+    delete:
+      operationId: deleteAgent
+      tags: [agents]
+      summary: Delete agent (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /agents/{id}/cars:
+    get:
+      operationId: getAgentCars
+      tags: [agents]
+      summary: Get cars uploaded by agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Agent's cars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Car"
+
+  # LOANS
+  /loans:
+    get:
+      operationId: listLoans
+      tags: [loans]
+      summary: List loan applications (admin)
+      responses:
+        "200":
+          description: Loan applications list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoanApplication"
+    post:
+      operationId: createLoan
+      tags: [loans]
+      summary: Submit loan application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanInput"
+      responses:
+        "201":
+          description: Loan application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanApplication"
+
+  /loans/calculate:
+    post:
+      operationId: calculateLoan
+      tags: [loans]
+      summary: Calculate loan payment estimate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanCalculatorInput"
+      responses:
+        "200":
+          description: Loan calculation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanCalculation"
+
+  /loans/my:
+    get:
+      operationId: getMyLoans
+      tags: [loans]
+      summary: Get current user's loan applications
+      responses:
+        "200":
+          description: My loans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoanApplication"
+
+  /loans/{id}:
+    get:
+      operationId: getLoan
+      tags: [loans]
+      summary: Get loan application by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Loan details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanApplication"
+    patch:
+      operationId: updateLoan
+      tags: [loans]
+      summary: Update loan status (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoanUpdate"
+      responses:
+        "200":
+          description: Updated loan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanApplication"
+
+  # CART
+  /cart:
+    get:
+      operationId: getCart
+      tags: [cart]
+      summary: Get current user's cart
+      responses:
+        "200":
+          description: Cart items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    post:
+      operationId: addToCart
+      tags: [cart]
+      summary: Add car to cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItemInput"
+      responses:
+        "201":
+          description: Added to cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    delete:
+      operationId: clearCart
+      tags: [cart]
+      summary: Clear cart
+      responses:
+        "200":
+          description: Cart cleared
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /cart/{carId}:
+    delete:
+      operationId: removeFromCart
+      tags: [cart]
+      summary: Remove car from cart
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Removed from cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  # ORDERS
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List all orders (admin)
+      responses:
+        "200":
+          description: Orders list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create an order (checkout)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/my:
+    get:
+      operationId: getMyOrders
+      tags: [orders]
+      summary: Get current user's orders
+      responses:
+        "200":
+          description: My orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+    patch:
+      operationId: updateOrder
+      tags: [orders]
+      summary: Update order status (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderUpdate"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  # ADMIN
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get admin dashboard stats
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/activity:
+    get:
+      operationId: getRecentActivity
+      tags: [admin]
+      summary: Get recent platform activity
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /admin/payment-settings:
+    get:
+      operationId: getPaymentSettings
+      tags: [admin]
+      summary: Get payment settings
+      responses:
+        "200":
+          description: Payment settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSettings"
+    patch:
+      operationId: updatePaymentSettings
+      tags: [admin]
+      summary: Update payment settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentSettingsUpdate"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSettings"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +887,657 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+        role:
+          type: string
+      required: [user, token, role]
+
+    UserRegisterInput:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: ["string", "null"]
+      required: [name, email, password]
+
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [user, agent, admin]
+        city:
+          type: ["string", "null"]
+        state:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+        emailVerified:
+          type: boolean
+        phoneVerified:
+          type: boolean
+        idVerified:
+          type: boolean
+        ssnVerified:
+          type: boolean
+        verificationStatus:
+          type: string
+          enum: [none, pending, approved, rejected]
+        createdAt:
+          type: string
+      required: [id, name, email, role, emailVerified, phoneVerified, idVerified, ssnVerified, verificationStatus, createdAt]
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+
+    LocationInput:
+      type: object
+      properties:
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+
+    VerificationInput:
+      type: object
+      properties:
+        idNumber:
+          type: ["string", "null"]
+        idType:
+          type: ["string", "null"]
+          enum: [drivers_license, passport, state_id, null]
+        ssnLast4:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        emailCode:
+          type: ["string", "null"]
+      required: []
+
+    Agent:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        totalCarUploads:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, name, email, isActive, totalCarUploads, createdAt]
+
+    AgentInput:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: ["string", "null"]
+      required: [name, email, password]
+
+    AgentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        isActive:
+          type: boolean
+
+    Car:
+      type: object
+      properties:
+        id:
+          type: integer
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        price:
+          type: number
+        mileage:
+          type: integer
+        color:
+          type: string
+        condition:
+          type: string
+          enum: [new, used, certified]
+        bodyType:
+          type: string
+        transmission:
+          type: string
+          enum: [automatic, manual, cvt]
+        fuelType:
+          type: string
+          enum: [gasoline, diesel, electric, hybrid, plug_in_hybrid]
+        engine:
+          type: ["string", "null"]
+        horsepower:
+          type: ["integer", "null"]
+        seatingCapacity:
+          type: ["integer", "null"]
+        vin:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        features:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [available, sold, reserved, pending]
+        isFeatured:
+          type: boolean
+        monthlyPayment:
+          type: ["number", "null"]
+        downPayment:
+          type: ["number", "null"]
+        agentId:
+          type: ["integer", "null"]
+        agentName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, make, model, year, price, mileage, color, condition, bodyType, transmission, fuelType, features, images, status, isFeatured, createdAt]
+
+    CarInput:
+      type: object
+      properties:
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        price:
+          type: number
+        mileage:
+          type: integer
+        color:
+          type: string
+        condition:
+          type: string
+          enum: [new, used, certified]
+        bodyType:
+          type: string
+        transmission:
+          type: string
+          enum: [automatic, manual, cvt]
+        fuelType:
+          type: string
+          enum: [gasoline, diesel, electric, hybrid, plug_in_hybrid]
+        engine:
+          type: string
+        horsepower:
+          type: integer
+        seatingCapacity:
+          type: integer
+        vin:
+          type: string
+        description:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        isFeatured:
+          type: boolean
+        monthlyPayment:
+          type: number
+        downPayment:
+          type: number
+      required: [make, model, year, price, mileage, color, condition, bodyType, transmission, fuelType]
+
+    CarUpdate:
+      type: object
+      properties:
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        price:
+          type: number
+        mileage:
+          type: integer
+        color:
+          type: string
+        condition:
+          type: string
+        bodyType:
+          type: string
+        transmission:
+          type: string
+        fuelType:
+          type: string
+        engine:
+          type: string
+        horsepower:
+          type: integer
+        seatingCapacity:
+          type: integer
+        vin:
+          type: string
+        description:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        isFeatured:
+          type: boolean
+        monthlyPayment:
+          type: number
+        downPayment:
+          type: number
+
+    CarListResponse:
+      type: object
+      properties:
+        cars:
+          type: array
+          items:
+            $ref: "#/components/schemas/Car"
+        total:
+          type: integer
+        page:
+          type: integer
+        totalPages:
+          type: integer
+      required: [cars, total, page, totalPages]
+
+    CarStats:
+      type: object
+      properties:
+        totalCars:
+          type: integer
+        availableCars:
+          type: integer
+        soldCars:
+          type: integer
+        newCars:
+          type: integer
+        usedCars:
+          type: integer
+        avgPrice:
+          type: number
+        makes:
+          type: array
+          items:
+            type: object
+            properties:
+              make:
+                type: string
+              count:
+                type: integer
+            required: [make, count]
+      required: [totalCars, availableCars, soldCars, newCars, usedCars, avgPrice, makes]
+
+    LoanApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        carId:
+          type: integer
+        car:
+          $ref: "#/components/schemas/Car"
+        loanAmount:
+          type: number
+        downPayment:
+          type: number
+        termMonths:
+          type: integer
+        interestRate:
+          type: number
+        monthlyPayment:
+          type: number
+        status:
+          type: string
+          enum: [pending, under_review, approved, rejected, completed]
+        employmentStatus:
+          type: ["string", "null"]
+        annualIncome:
+          type: ["number", "null"]
+        creditScore:
+          type: ["integer", "null"]
+        idVerified:
+          type: boolean
+        ssnVerified:
+          type: boolean
+        adminNotes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, userId, carId, loanAmount, downPayment, termMonths, interestRate, monthlyPayment, status, idVerified, ssnVerified, createdAt]
+
+    LoanInput:
+      type: object
+      properties:
+        carId:
+          type: integer
+        loanAmount:
+          type: number
+        downPayment:
+          type: number
+        termMonths:
+          type: integer
+        employmentStatus:
+          type: string
+        annualIncome:
+          type: number
+        idNumber:
+          type: string
+        idType:
+          type: string
+        ssnLast4:
+          type: string
+      required: [carId, loanAmount, downPayment, termMonths, employmentStatus, annualIncome]
+
+    LoanUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, under_review, approved, rejected, completed]
+        interestRate:
+          type: number
+        adminNotes:
+          type: string
+
+    LoanCalculatorInput:
+      type: object
+      properties:
+        vehiclePrice:
+          type: number
+        downPayment:
+          type: number
+        termMonths:
+          type: integer
+        creditScore:
+          type: integer
+      required: [vehiclePrice, downPayment, termMonths]
+
+    LoanCalculation:
+      type: object
+      properties:
+        loanAmount:
+          type: number
+        interestRate:
+          type: number
+        monthlyPayment:
+          type: number
+        totalPayment:
+          type: number
+        totalInterest:
+          type: number
+        termMonths:
+          type: integer
+      required: [loanAmount, interestRate, monthlyPayment, totalPayment, totalInterest, termMonths]
+
+    CartItem:
+      type: object
+      properties:
+        carId:
+          type: integer
+        car:
+          $ref: "#/components/schemas/Car"
+        paymentType:
+          type: string
+          enum: [full, installment]
+        addedAt:
+          type: string
+      required: [carId, car, paymentType, addedAt]
+
+    Cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        totalPrice:
+          type: number
+      required: [items, totalPrice]
+
+    CartItemInput:
+      type: object
+      properties:
+        carId:
+          type: integer
+        paymentType:
+          type: string
+          enum: [full, installment]
+      required: [carId, paymentType]
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        carId:
+          type: integer
+        car:
+          $ref: "#/components/schemas/Car"
+        paymentType:
+          type: string
+          enum: [full, installment]
+        totalAmount:
+          type: number
+        downPayment:
+          type: ["number", "null"]
+        monthlyPayment:
+          type: ["number", "null"]
+        termMonths:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [pending, processing, approved, completed, cancelled]
+        paymentStatus:
+          type: string
+          enum: [pending, partial, paid, failed]
+        transactionId:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, userId, carId, paymentType, totalAmount, status, paymentStatus, createdAt]
+
+    OrderInput:
+      type: object
+      properties:
+        carId:
+          type: integer
+        paymentType:
+          type: string
+          enum: [full, installment]
+        downPayment:
+          type: number
+        termMonths:
+          type: integer
+        cardLast4:
+          type: string
+        cardBrand:
+          type: string
+      required: [carId, paymentType]
+
+    OrderUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, processing, approved, completed, cancelled]
+        paymentStatus:
+          type: string
+          enum: [pending, partial, paid, failed]
+        transactionId:
+          type: string
+
+    AdminStats:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        totalCars:
+          type: integer
+        totalOrders:
+          type: integer
+        totalRevenue:
+          type: number
+        pendingLoans:
+          type: integer
+        activeAgents:
+          type: integer
+        carsAvailable:
+          type: integer
+        carsSold:
+          type: integer
+        ordersThisMonth:
+          type: integer
+        revenueThisMonth:
+          type: number
+      required: [totalUsers, totalCars, totalOrders, totalRevenue, pendingLoans, activeAgents, carsAvailable, carsSold, ordersThisMonth, revenueThisMonth]
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [car_uploaded, order_placed, loan_applied, user_registered, loan_approved, car_sold]
+        description:
+          type: string
+        userId:
+          type: ["integer", "null"]
+        carId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+      required: [id, type, description, createdAt]
+
+    PaymentSettings:
+      type: object
+      properties:
+        defaultInterestRate:
+          type: number
+        minDownPaymentPercent:
+          type: number
+        maxLoanTermMonths:
+          type: integer
+        processingFeePercent:
+          type: number
+        acceptedPaymentMethods:
+          type: array
+          items:
+            type: string
+        installmentEnabled:
+          type: boolean
+        fullPaymentEnabled:
+          type: boolean
+      required: [defaultInterestRate, minDownPaymentPercent, maxLoanTermMonths, processingFeePercent, acceptedPaymentMethods, installmentEnabled, fullPaymentEnabled]
+
+    PaymentSettingsUpdate:
+      type: object
+      properties:
+        defaultInterestRate:
+          type: number
+        minDownPaymentPercent:
+          type: number
+        maxLoanTermMonths:
+          type: integer
+        processingFeePercent:
+          type: number
+        acceptedPaymentMethods:
+          type: array
+          items:
+            type: string
+        installmentEnabled:
+          type: boolean
+        fullPaymentEnabled:
+          type: boolean
