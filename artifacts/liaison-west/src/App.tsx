@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
-
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import AgentLogin from "@/pages/agent-login";
@@ -24,6 +24,9 @@ import AdminAgents from "@/pages/admin-agents";
 import AdminOrders from "@/pages/admin-orders";
 import AdminLoans from "@/pages/admin-loans";
 import AdminPaymentSettings from "@/pages/admin-payment-settings";
+
+// Attach the stored token to every API request as a Bearer header
+setAuthTokenGetter(() => localStorage.getItem("lw_token"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
