@@ -59,9 +59,16 @@ function fmt(n: number) {
 
 /* ─── COMPONENT ─── */
 export default function Checkout() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+
+  // Redirect to login only after auth has settled (not while loading)
+  useEffect(() => {
+    if (!authLoading && !user) {
+      setLocation("/login");
+    }
+  }, [authLoading, user, setLocation]);
 
   const [paymentChoice, setPaymentChoice] = useState<PaymentChoice>("full");
   const [paymentGroup, setPaymentGroup] = useState<PaymentGroup>("card");
@@ -192,7 +199,9 @@ export default function Checkout() {
     return CREDIT_TIERS.find((t) => score >= t.min) || CREDIT_TIERS[CREDIT_TIERS.length - 1];
   }
 
-  if (!user) { setLocation("/login"); return null; }
+  if (authLoading || !user) {
+    return <Layout><div className="container py-24 text-center text-white/40">Loading...</div></Layout>;
+  }
 
   // ── SUCCESS ──
   if (isSuccess) {
