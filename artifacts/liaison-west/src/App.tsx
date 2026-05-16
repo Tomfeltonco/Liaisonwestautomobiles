@@ -1,29 +1,38 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 
-// Pages
 import Home from "@/pages/home";
 import Login from "@/pages/login";
 import AgentLogin from "@/pages/agent-login";
 import Inventory from "@/pages/inventory";
+import Car from "@/pages/car";
+import Finance from "@/pages/finance";
+import FinanceApply from "@/pages/finance-apply";
+import Cart from "@/pages/cart";
+import Checkout from "@/pages/checkout";
+import Account from "@/pages/account";
+import AgentDashboard from "@/pages/agent-dashboard";
+import AdminDashboard from "@/pages/admin-dashboard";
+import AdminCars from "@/pages/admin-cars";
+import AdminUsers from "@/pages/admin-users";
+import AdminAgents from "@/pages/admin-agents";
+import AdminOrders from "@/pages/admin-orders";
+import AdminLoans from "@/pages/admin-loans";
+import AdminPaymentSettings from "@/pages/admin-payment-settings";
 
-// Placeholders for routes to build in next rounds
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background text-foreground">
-      <div className="text-center">
-        <h1 className="text-3xl font-serif font-bold text-white mb-2">{title}</h1>
-        <p className="text-muted-foreground">This section is currently being developed.</p>
-      </div>
-    </div>
-  );
-}
-
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30_000,
+    },
+  },
+});
 
 function Router() {
   return (
@@ -32,25 +41,20 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/agent/login" component={AgentLogin} />
       <Route path="/inventory" component={Inventory} />
-      
-      {/* Routes to be implemented */}
-      <Route path="/car/:id" component={() => <PlaceholderPage title="Car Details" />} />
-      <Route path="/finance" component={() => <PlaceholderPage title="Financing Hub" />} />
-      <Route path="/finance/apply" component={() => <PlaceholderPage title="Loan Application" />} />
-      <Route path="/cart" component={() => <PlaceholderPage title="Shopping Cart" />} />
-      <Route path="/checkout" component={() => <PlaceholderPage title="Checkout" />} />
-      <Route path="/account" component={() => <PlaceholderPage title="My Account" />} />
-      
-      {/* Agent/Admin routes */}
-      <Route path="/agent/dashboard" component={() => <PlaceholderPage title="Agent Dashboard" />} />
-      <Route path="/admin" component={() => <PlaceholderPage title="Admin Dashboard" />} />
-      <Route path="/admin/cars" component={() => <PlaceholderPage title="Admin: Manage Cars" />} />
-      <Route path="/admin/users" component={() => <PlaceholderPage title="Admin: Manage Users" />} />
-      <Route path="/admin/agents" component={() => <PlaceholderPage title="Admin: Manage Agents" />} />
-      <Route path="/admin/orders" component={() => <PlaceholderPage title="Admin: Manage Orders" />} />
-      <Route path="/admin/loans" component={() => <PlaceholderPage title="Admin: Manage Loans" />} />
-      <Route path="/admin/payment-settings" component={() => <PlaceholderPage title="Admin: Payment Settings" />} />
-      
+      <Route path="/car/:id" component={Car} />
+      <Route path="/finance" component={Finance} />
+      <Route path="/finance/apply" component={FinanceApply} />
+      <Route path="/cart" component={Cart} />
+      <Route path="/checkout" component={Checkout} />
+      <Route path="/account" component={Account} />
+      <Route path="/agent/dashboard" component={AgentDashboard} />
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/cars" component={AdminCars} />
+      <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/agents" component={AdminAgents} />
+      <Route path="/admin/orders" component={AdminOrders} />
+      <Route path="/admin/loans" component={AdminLoans} />
+      <Route path="/admin/payment-settings" component={AdminPaymentSettings} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -65,6 +69,7 @@ function App() {
             <Router />
           </WouterRouter>
           <Toaster />
+          <Sonner richColors position="top-right" />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

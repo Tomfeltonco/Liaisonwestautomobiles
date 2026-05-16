@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateLoan, useListCars } from "@workspace/api-client-react";
 import { toast } from "sonner";
-import { CheckCircle2, ChevronRight, Calculator, User, ShieldCheck, Mail, ArrowLeft } from "lucide-react";
+import { CheckCircle2, ChevronRight, Calculator, User, ShieldCheck, Mail, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function FinanceApply() {

@@ -1,5 +1,5 @@
 import { AdminLayout } from "@/components/admin-layout";
-import { useGetMe, useGetAgentCars, getGetAgentCarsQueryKey, useCreateCar } from "@workspace/api-client-react";
+import { useGetMe, useGetAgentCars, getGetAgentCarsQueryKey, getGetMeQueryKey, useCreateCar } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +53,7 @@ export default function AgentDashboard() {
   const { data: agentData } = useGetMe({
     query: {
       enabled: !!user,
+      queryKey: getGetMeQueryKey(),
     }
   });
 
@@ -115,8 +116,8 @@ export default function AgentDashboard() {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
   };
 
-  const activeListings = carsData?.cars.filter(c => c.status === 'available').length || 0;
-  const soldListings = carsData?.cars.filter(c => c.status === 'sold').length || 0;
+  const activeListings = carsData?.filter(c => c.status === 'available').length || 0;
+  const soldListings = carsData?.filter(c => c.status === 'sold').length || 0;
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background selection:bg-white selection:text-black">
@@ -308,7 +309,7 @@ export default function AgentDashboard() {
               <ListOrdered className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">{carsData?.total || 0}</div>
+              <div className="text-3xl font-bold text-white">{carsData?.length || 0}</div>
             </CardContent>
           </Card>
           
@@ -357,14 +358,14 @@ export default function AgentDashboard() {
                     <TableCell><Skeleton className="h-8 w-16 ml-auto bg-white/5" /></TableCell>
                   </TableRow>
                 ))
-              ) : carsData?.cars.length === 0 ? (
+              ) : (carsData?.length ?? 0) === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
                     You haven't listed any vehicles yet.
                   </TableCell>
                 </TableRow>
               ) : (
-                carsData?.cars.map((car) => (
+                carsData?.map((car) => (
                   <TableRow key={car.id} className="border-white/5 hover:bg-white/5">
                     <TableCell>
                       <div className="flex items-center gap-3">

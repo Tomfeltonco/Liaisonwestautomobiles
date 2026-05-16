@@ -66,6 +66,7 @@ export default function Account() {
           const data = await res.json();
           
           updateLocationMutation.mutate({
+            id: user!.id,
             data: {
               latitude,
               longitude,

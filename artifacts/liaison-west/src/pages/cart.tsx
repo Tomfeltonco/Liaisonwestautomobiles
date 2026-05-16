@@ -38,7 +38,7 @@ export default function Cart() {
   });
 
   const handleRemove = (carId: number) => {
-    removeFromCartMutation.mutate({ data: { carId } });
+    removeFromCartMutation.mutate({ carId });
   };
 
   const handleClear = () => {
