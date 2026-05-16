@@ -1,34 +1,44 @@
+import { useState } from "react";
 import { AdminLayout } from "@/components/admin-layout";
 import { useListLoans, getListLoansQueryKey, useUpdateLoan } from "@workspace/api-client-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle2, XCircle, Clock, Eye, ChevronDown, ChevronUp } from "lucide-react";
+
+const STATUS_STYLE: Record<string, string> = {
+  approved: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  completed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  rejected: "bg-red-500/20 text-red-400 border-red-500/30",
+  under_review: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  pending: "bg-yellow-500/20 text-yellow-600 border-yellow-500/30",
+};
 
 export default function AdminLoans() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   const { data: loans, isLoading } = useListLoans();
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [notes, setNotes] = useState<Record<number, string>>({});
 
-  const updateLoanMutation = useUpdateLoan({
+  const updateLoan = useUpdateLoan({
     mutation: {
-      onSuccess: () => {
-        toast.success("Loan application updated");
-        queryClient.invalidateQueries({ queryKey: getListLoansQueryKey() });
+      onSuccess: (updated) => {
+        toast.success(`Loan #${updated.id} updated to "${updated.status}"`);
+        qc.invalidateQueries({ queryKey: getListLoansQueryKey() });
       },
-      onError: (err: any) => {
-        toast.error(err.message || "Failed to update loan");
-      }
-    }
+      onError: () => toast.error("Failed to update loan"),
+    },
   });
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
-  };
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
-  const handleStatusChange = (id: number, status: string) => {
-    updateLoanMutation.mutate({ id, data: { status: status as any } });
+  const handleStatus = (id: number, status: string) => {
+    updateLoan.mutate({ id, data: { status: status as any, adminNotes: notes[id] } });
   };
 
   return (
@@ -37,74 +47,184 @@ export default function AdminLoans() {
         <Table>
           <TableHeader className="bg-white/5">
             <TableRow className="border-white/5 hover:bg-transparent">
-              <TableHead className="text-muted-foreground">ID</TableHead>
-              <TableHead className="text-muted-foreground">User</TableHead>
-              <TableHead className="text-muted-foreground">Loan Details</TableHead>
-              <TableHead className="text-muted-foreground">Applicant Financials</TableHead>
-              <TableHead className="text-muted-foreground">Verification</TableHead>
+              <TableHead className="text-muted-foreground w-10" />
+              <TableHead className="text-muted-foreground">Application</TableHead>
+              <TableHead className="text-muted-foreground">Vehicle</TableHead>
+              <TableHead className="text-muted-foreground">Loan Terms</TableHead>
+              <TableHead className="text-muted-foreground">Financials</TableHead>
+              <TableHead className="text-muted-foreground">Verify</TableHead>
               <TableHead className="text-muted-foreground">Status</TableHead>
+              <TableHead className="text-muted-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="border-white/5">
-                  <TableCell><Skeleton className="h-4 w-8 bg-white/5" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24 bg-white/5" /></TableCell>
-                  <TableCell><Skeleton className="h-12 w-48 bg-white/5" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-32 bg-white/5" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-24 bg-white/5" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-32 bg-white/5" /></TableCell>
+                  {Array.from({ length: 8 }).map((_, j) => (
+                    <TableCell key={j}><Skeleton className="h-4 w-full bg-white/5" /></TableCell>
+                  ))}
                 </TableRow>
               ))
-            ) : loans?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  No loan applications found
-                </TableCell>
-              </TableRow>
-            ) : (
-              loans?.map((loan) => (
-                <TableRow key={loan.id} className="border-white/5 hover:bg-white/5">
-                  <TableCell className="font-medium text-white">#{loan.id}</TableCell>
-                  <TableCell className="text-muted-foreground">User ID: {loan.userId}</TableCell>
-                  <TableCell>
-                    <div className="font-medium text-white">{formatPrice(loan.loanAmount)}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {loan.termMonths}mo @ {(loan.interestRate * 100).toFixed(2)}% APR
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-white capitalize">{loan.employmentStatus?.replace('_', ' ')}</div>
-                    <div className="text-xs text-muted-foreground">Income: {loan.annualIncome ? formatPrice(loan.annualIncome) : 'N/A'}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      {loan.idVerified ? <Badge className="bg-green-500/20 text-green-500 border-none text-[10px]">ID Verified</Badge> : <Badge variant="outline" className="text-[10px] text-yellow-500 border-yellow-500/50">ID Pending</Badge>}
-                      {loan.ssnVerified ? <Badge className="bg-green-500/20 text-green-500 border-none text-[10px]">SSN Verified</Badge> : <Badge variant="outline" className="text-[10px] text-yellow-500 border-yellow-500/50">SSN Pending</Badge>}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Select defaultValue={loan.status} onValueChange={(v) => handleStatusChange(loan.id, v)}>
-                      <SelectTrigger className={`border-white/10 h-8 text-xs ${
-                        loan.status === 'approved' || loan.status === 'completed' ? 'text-green-500' :
-                        loan.status === 'rejected' ? 'text-red-500' :
-                        loan.status === 'under_review' ? 'text-blue-500' : 'text-yellow-500'
-                      }`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="under_review">Under Review</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+              : loans?.length === 0
+                ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                      No loan applications found
+                    </TableCell>
+                  </TableRow>
+                )
+                : loans?.map((loan) => (
+                  <>
+                    <TableRow
+                      key={loan.id}
+                      className="border-white/5 hover:bg-white/5 cursor-pointer"
+                      onClick={() => setExpandedId(expandedId === loan.id ? null : loan.id)}
+                    >
+                      <TableCell>
+                        {expandedId === loan.id
+                          ? <ChevronUp className="w-4 h-4 text-white/30" />
+                          : <ChevronDown className="w-4 h-4 text-white/30" />}
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-mono text-white text-sm">#{loan.id}</div>
+                        <div className="text-xs text-muted-foreground">User #{loan.userId}</div>
+                        <div className="text-xs text-muted-foreground">{new Date(loan.createdAt).toLocaleDateString()}</div>
+                      </TableCell>
+                      <TableCell>
+                        {loan.car ? (
+                          <div>
+                            <div className="text-white text-sm font-medium">{loan.car.year} {loan.car.make}</div>
+                            <div className="text-xs text-muted-foreground">{loan.car.model}</div>
+                            <div className="text-xs text-white/50 font-semibold">{fmt(loan.car.price)}</div>
+                          </div>
+                        ) : <span className="text-muted-foreground text-sm">Car #{loan.carId}</span>}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-white text-sm font-semibold">{fmt(loan.loanAmount)}</div>
+                        <div className="text-xs text-muted-foreground">{loan.termMonths} mo @ {loan.interestRate.toFixed(1)}% APR</div>
+                        <div className="text-xs text-white/50">{fmt(loan.monthlyPayment)}/mo</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-white capitalize">{loan.employmentStatus?.replace("_", " ") || "—"}</div>
+                        <div className="text-xs text-muted-foreground">{loan.annualIncome ? fmt(loan.annualIncome) + " /yr" : "N/A"}</div>
+                        {loan.creditScore && <div className="text-xs font-semibold text-white/70">Score: {loan.creditScore}</div>}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="outline" className={`text-[10px] border ${loan.idVerified ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "text-yellow-500 border-yellow-500/30"}`}>
+                            {loan.idVerified ? "✓ ID" : "ID Pending"}
+                          </Badge>
+                          <Badge variant="outline" className={`text-[10px] border ${loan.ssnVerified ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "text-yellow-500 border-yellow-500/30"}`}>
+                            {loan.ssnVerified ? "✓ SSN" : "SSN Pending"}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`text-[10px] capitalize border ${STATUS_STYLE[loan.status] ?? ""}`}>
+                          {loan.status.replace("_", " ")}
+                        </Badge>
+                      </TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <div className="flex gap-1.5">
+                          {loan.status !== "approved" && loan.status !== "completed" && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleStatus(loan.id, "approved")}
+                              disabled={updateLoan.isPending}
+                              className="h-7 px-2.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 text-[11px] font-semibold rounded-lg"
+                            >
+                              <CheckCircle2 className="w-3 h-3 mr-1" />Approve
+                            </Button>
+                          )}
+                          {loan.status !== "rejected" && loan.status !== "completed" && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleStatus(loan.id, "rejected")}
+                              disabled={updateLoan.isPending}
+                              className="h-7 px-2.5 bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/25 text-[11px] font-semibold rounded-lg"
+                            >
+                              <XCircle className="w-3 h-3 mr-1" />Decline
+                            </Button>
+                          )}
+                          {loan.status === "pending" && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleStatus(loan.id, "under_review")}
+                              disabled={updateLoan.isPending}
+                              className="h-7 px-2.5 bg-purple-500/15 text-purple-400 hover:bg-purple-500/25 border border-purple-500/25 text-[11px] font-semibold rounded-lg"
+                            >
+                              <Clock className="w-3 h-3 mr-1" />Review
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+
+                    {/* Expanded row — admin notes */}
+                    {expandedId === loan.id && (
+                      <TableRow key={`${loan.id}-notes`} className="border-white/5 bg-white/[0.02]">
+                        <TableCell colSpan={8} className="py-4 px-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <p className="text-white/50 text-xs uppercase tracking-wider font-semibold mb-2">Application Details</p>
+                              <div className="space-y-1.5 text-sm">
+                                {[
+                                  ["Loan Amount", fmt(loan.loanAmount)],
+                                  ["Down Payment", fmt(loan.downPayment)],
+                                  ["Principal", fmt(loan.loanAmount - loan.downPayment)],
+                                  ["Interest Rate", `${loan.interestRate.toFixed(1)}% APR`],
+                                  ["Monthly Payment", `${fmt(loan.monthlyPayment)}/mo`],
+                                  ["Term", `${loan.termMonths} months`],
+                                  ["Total Repayable", fmt(loan.monthlyPayment * loan.termMonths + loan.downPayment)],
+                                ].map(([label, val]) => (
+                                  <div key={label} className="flex justify-between">
+                                    <span className="text-white/40">{label}</span>
+                                    <span className="text-white font-medium">{val}</span>
+                                  </div>
+                                ))}
+                                {loan.adminNotes && (
+                                  <div className="mt-3 pt-3 border-t border-white/8">
+                                    <p className="text-white/40 text-xs mb-1">Previous Notes</p>
+                                    <p className="text-white/70 text-xs">{loan.adminNotes}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-white/50 text-xs uppercase tracking-wider font-semibold mb-2">Admin Notes</p>
+                              <Textarea
+                                value={notes[loan.id] ?? loan.adminNotes ?? ""}
+                                onChange={(e) => setNotes({ ...notes, [loan.id]: e.target.value })}
+                                placeholder="Add notes for this application..."
+                                className="bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl text-sm resize-none mb-3"
+                                rows={4}
+                              />
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleStatus(loan.id, "approved")}
+                                  disabled={updateLoan.isPending || loan.status === "approved"}
+                                  className="h-9 flex-1 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 font-semibold rounded-xl"
+                                >
+                                  <CheckCircle2 className="w-4 h-4 mr-1.5" />Approve Application
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleStatus(loan.id, "rejected")}
+                                  disabled={updateLoan.isPending || loan.status === "rejected"}
+                                  className="h-9 flex-1 bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/25 font-semibold rounded-xl"
+                                >
+                                  <XCircle className="w-4 h-4 mr-1.5" />Decline Application
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                ))}
           </TableBody>
         </Table>
       </div>

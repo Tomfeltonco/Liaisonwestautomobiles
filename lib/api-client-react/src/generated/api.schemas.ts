@@ -575,6 +575,113 @@ export interface PaymentSettingsUpdate {
   fullPaymentEnabled?: boolean;
 }
 
+export interface SiteSettings {
+  id: number;
+  conciergeName: string;
+  conciergeTitle: string;
+  conciergePhone: string;
+  conciergeEmail: string;
+  conciergeAddress: string;
+  conciergeHours: string;
+  supportPhone: string;
+  supportEmail: string;
+  updatedAt: string;
+}
+
+export interface SiteSettingsUpdate {
+  conciergeName?: string;
+  conciergeTitle?: string;
+  conciergePhone?: string;
+  conciergeEmail?: string;
+  conciergeAddress?: string;
+  conciergeHours?: string;
+  supportPhone?: string;
+  supportEmail?: string;
+}
+
+export type ChatRoomStatus = typeof ChatRoomStatus[keyof typeof ChatRoomStatus];
+
+
+export const ChatRoomStatus = {
+  open: 'open',
+  assigned: 'assigned',
+  closed: 'closed',
+} as const;
+
+export interface ChatRoom {
+  id: number;
+  userId: number;
+  /** @nullable */
+  agentId?: number | null;
+  status: ChatRoomStatus;
+  subject: string;
+  lastMessageAt: string;
+  createdAt: string;
+  /** @nullable */
+  userName?: string | null;
+  /** @nullable */
+  userEmail?: string | null;
+}
+
+export interface ChatRoomInput {
+  subject?: string;
+}
+
+export type ChatRoomUpdateStatus = typeof ChatRoomUpdateStatus[keyof typeof ChatRoomUpdateStatus];
+
+
+export const ChatRoomUpdateStatus = {
+  open: 'open',
+  assigned: 'assigned',
+  closed: 'closed',
+} as const;
+
+export interface ChatRoomUpdate {
+  status?: ChatRoomUpdateStatus;
+  agentId?: number;
+}
+
+export interface ChatMessage {
+  id: number;
+  roomId: number;
+  senderId: number;
+  senderRole: string;
+  senderName: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface ChatMessageInput {
+  message: string;
+}
+
+export type InspectionStatus = typeof InspectionStatus[keyof typeof InspectionStatus];
+
+
+export const InspectionStatus = {
+  scheduled: 'scheduled',
+  in_progress: 'in_progress',
+  completed: 'completed',
+} as const;
+
+export interface Inspection {
+  id: number;
+  orderId: number;
+  userId: number;
+  carId: number;
+  reportNumber: string;
+  inspector: string;
+  inspectorTitle: string;
+  inspectionDate: string;
+  inspectionTime: string;
+  address: string;
+  status: InspectionStatus;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+  car?: Car;
+}
+
 export type ListCarsParams = {
 make?: string;
 model?: string;

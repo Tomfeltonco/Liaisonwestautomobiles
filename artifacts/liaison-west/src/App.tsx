@@ -17,6 +17,7 @@ import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import Account from "@/pages/account";
 import AgentDashboard from "@/pages/agent-dashboard";
+import AgentChat from "@/pages/agent-chat";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminCars from "@/pages/admin-cars";
 import AdminUsers from "@/pages/admin-users";
@@ -24,6 +25,8 @@ import AdminAgents from "@/pages/admin-agents";
 import AdminOrders from "@/pages/admin-orders";
 import AdminLoans from "@/pages/admin-loans";
 import AdminPaymentSettings from "@/pages/admin-payment-settings";
+import AdminSettings from "@/pages/admin-settings";
+import AdminChat from "@/pages/admin-chat";
 
 // Attach the stored token to every API request as a Bearer header
 setAuthTokenGetter(() => localStorage.getItem("lw_token"));
@@ -51,6 +54,7 @@ function Router() {
       <Route path="/checkout" component={Checkout} />
       <Route path="/account" component={Account} />
       <Route path="/agent/dashboard" component={AgentDashboard} />
+      <Route path="/agent/chat" component={AgentChat} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/cars" component={AdminCars} />
       <Route path="/admin/users" component={AdminUsers} />
@@ -58,6 +62,8 @@ function Router() {
       <Route path="/admin/orders" component={AdminOrders} />
       <Route path="/admin/loans" component={AdminLoans} />
       <Route path="/admin/payment-settings" component={AdminPaymentSettings} />
+      <Route path="/admin/settings" component={AdminSettings} />
+      <Route path="/admin/chat" component={AdminChat} />
       <Route component={NotFound} />
     </Switch>
   );

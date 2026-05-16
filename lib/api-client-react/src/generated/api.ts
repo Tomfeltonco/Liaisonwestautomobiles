@@ -33,7 +33,13 @@ import type {
   CarUpdate,
   Cart,
   CartItemInput,
+  ChatMessage,
+  ChatMessageInput,
+  ChatRoom,
+  ChatRoomInput,
+  ChatRoomUpdate,
   HealthStatus,
+  Inspection,
   ListCarsParams,
   LoanApplication,
   LoanCalculation,
@@ -48,6 +54,8 @@ import type {
   OrderUpdate,
   PaymentSettings,
   PaymentSettingsUpdate,
+  SiteSettings,
+  SiteSettingsUpdate,
   User,
   UserRegisterInput,
   UserUpdate,
@@ -3401,4 +3409,752 @@ export const useUpdatePaymentSettings = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getUpdatePaymentSettingsMutationOptions(options));
     }
+
+export const getGetSiteSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/site-settings`
+}
+
+/**
+ * @summary Get site settings (concierge contact)
+ */
+export const getSiteSettings = async ( options?: RequestInit): Promise<SiteSettings> => {
+
+  return customFetch<SiteSettings>(getGetSiteSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSiteSettingsQueryKey = () => {
+    return [
+    `/api/admin/site-settings`
+    ] as const;
+    }
+
+
+export const getGetSiteSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getSiteSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSiteSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSiteSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSiteSettings>>> = ({ signal }) => getSiteSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSiteSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSiteSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getSiteSettings>>>
+export type GetSiteSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get site settings (concierge contact)
+ */
+
+export function useGetSiteSettings<TData = Awaited<ReturnType<typeof getSiteSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSiteSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSiteSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateSiteSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/site-settings`
+}
+
+/**
+ * @summary Update site settings
+ */
+export const updateSiteSettings = async (siteSettingsUpdate: SiteSettingsUpdate, options?: RequestInit): Promise<SiteSettings> => {
+
+  return customFetch<SiteSettings>(getUpdateSiteSettingsUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      siteSettingsUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateSiteSettingsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSiteSettings>>, TError,{data: BodyType<SiteSettingsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSiteSettings>>, TError,{data: BodyType<SiteSettingsUpdate>}, TContext> => {
+
+const mutationKey = ['updateSiteSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSiteSettings>>, {data: BodyType<SiteSettingsUpdate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateSiteSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSiteSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updateSiteSettings>>>
+    export type UpdateSiteSettingsMutationBody = BodyType<SiteSettingsUpdate>
+    export type UpdateSiteSettingsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update site settings
+ */
+export const useUpdateSiteSettings = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSiteSettings>>, TError,{data: BodyType<SiteSettingsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateSiteSettings>>,
+        TError,
+        {data: BodyType<SiteSettingsUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateSiteSettingsMutationOptions(options));
+    }
+
+export const getGetPublicSiteSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/site-settings/public`
+}
+
+/**
+ * @summary Get public site settings (no auth)
+ */
+export const getPublicSiteSettings = async ( options?: RequestInit): Promise<SiteSettings> => {
+
+  return customFetch<SiteSettings>(getGetPublicSiteSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicSiteSettingsQueryKey = () => {
+    return [
+    `/api/admin/site-settings/public`
+    ] as const;
+    }
+
+
+export const getGetPublicSiteSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getPublicSiteSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicSiteSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicSiteSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicSiteSettings>>> = ({ signal }) => getPublicSiteSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicSiteSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicSiteSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicSiteSettings>>>
+export type GetPublicSiteSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get public site settings (no auth)
+ */
+
+export function useGetPublicSiteSettings<TData = Awaited<ReturnType<typeof getPublicSiteSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicSiteSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicSiteSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListChatRoomsUrl = () => {
+
+
+
+
+  return `/api/chat/rooms`
+}
+
+/**
+ * @summary List chat rooms
+ */
+export const listChatRooms = async ( options?: RequestInit): Promise<ChatRoom[]> => {
+
+  return customFetch<ChatRoom[]>(getListChatRoomsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListChatRoomsQueryKey = () => {
+    return [
+    `/api/chat/rooms`
+    ] as const;
+    }
+
+
+export const getListChatRoomsQueryOptions = <TData = Awaited<ReturnType<typeof listChatRooms>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChatRooms>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListChatRoomsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChatRooms>>> = ({ signal }) => listChatRooms({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listChatRooms>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListChatRoomsQueryResult = NonNullable<Awaited<ReturnType<typeof listChatRooms>>>
+export type ListChatRoomsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List chat rooms
+ */
+
+export function useListChatRooms<TData = Awaited<ReturnType<typeof listChatRooms>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChatRooms>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListChatRoomsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateChatRoomUrl = () => {
+
+
+
+
+  return `/api/chat/rooms`
+}
+
+/**
+ * @summary Create or reuse chat room
+ */
+export const createChatRoom = async (chatRoomInput?: ChatRoomInput, options?: RequestInit): Promise<ChatRoom> => {
+
+  return customFetch<ChatRoom>(getCreateChatRoomUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      chatRoomInput,)
+  }
+);}
+
+
+
+
+export const getCreateChatRoomMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChatRoom>>, TError,{data?: BodyType<ChatRoomInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createChatRoom>>, TError,{data?: BodyType<ChatRoomInput>}, TContext> => {
+
+const mutationKey = ['createChatRoom'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createChatRoom>>, {data?: BodyType<ChatRoomInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createChatRoom(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateChatRoomMutationResult = NonNullable<Awaited<ReturnType<typeof createChatRoom>>>
+    export type CreateChatRoomMutationBody = BodyType<ChatRoomInput> | undefined
+    export type CreateChatRoomMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create or reuse chat room
+ */
+export const useCreateChatRoom = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChatRoom>>, TError,{data?: BodyType<ChatRoomInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createChatRoom>>,
+        TError,
+        {data?: BodyType<ChatRoomInput>},
+        TContext
+      > => {
+      return useMutation(getCreateChatRoomMutationOptions(options));
+    }
+
+export const getGetChatMessagesUrl = (id: number,) => {
+
+
+
+
+  return `/api/chat/rooms/${id}/messages`
+}
+
+/**
+ * @summary Get messages in a room
+ */
+export const getChatMessages = async (id: number, options?: RequestInit): Promise<ChatMessage[]> => {
+
+  return customFetch<ChatMessage[]>(getGetChatMessagesUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetChatMessagesQueryKey = (id: number,) => {
+    return [
+    `/api/chat/rooms/${id}/messages`
+    ] as const;
+    }
+
+
+export const getGetChatMessagesQueryOptions = <TData = Awaited<ReturnType<typeof getChatMessages>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChatMessages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetChatMessagesQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getChatMessages>>> = ({ signal }) => getChatMessages(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getChatMessages>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetChatMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof getChatMessages>>>
+export type GetChatMessagesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get messages in a room
+ */
+
+export function useGetChatMessages<TData = Awaited<ReturnType<typeof getChatMessages>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChatMessages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetChatMessagesQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSendChatMessageUrl = (id: number,) => {
+
+
+
+
+  return `/api/chat/rooms/${id}/messages`
+}
+
+/**
+ * @summary Send a message
+ */
+export const sendChatMessage = async (id: number,
+    chatMessageInput: ChatMessageInput, options?: RequestInit): Promise<ChatMessage> => {
+
+  return customFetch<ChatMessage>(getSendChatMessageUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      chatMessageInput,)
+  }
+);}
+
+
+
+
+export const getSendChatMessageMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{id: number;data: BodyType<ChatMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{id: number;data: BodyType<ChatMessageInput>}, TContext> => {
+
+const mutationKey = ['sendChatMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendChatMessage>>, {id: number;data: BodyType<ChatMessageInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  sendChatMessage(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof sendChatMessage>>>
+    export type SendChatMessageMutationBody = BodyType<ChatMessageInput>
+    export type SendChatMessageMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Send a message
+ */
+export const useSendChatMessage = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{id: number;data: BodyType<ChatMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendChatMessage>>,
+        TError,
+        {id: number;data: BodyType<ChatMessageInput>},
+        TContext
+      > => {
+      return useMutation(getSendChatMessageMutationOptions(options));
+    }
+
+export const getUpdateChatRoomUrl = (id: number,) => {
+
+
+
+
+  return `/api/chat/rooms/${id}`
+}
+
+/**
+ * @summary Update chat room (assign agent, close)
+ */
+export const updateChatRoom = async (id: number,
+    chatRoomUpdate: ChatRoomUpdate, options?: RequestInit): Promise<ChatRoom> => {
+
+  return customFetch<ChatRoom>(getUpdateChatRoomUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      chatRoomUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateChatRoomMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChatRoom>>, TError,{id: number;data: BodyType<ChatRoomUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateChatRoom>>, TError,{id: number;data: BodyType<ChatRoomUpdate>}, TContext> => {
+
+const mutationKey = ['updateChatRoom'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChatRoom>>, {id: number;data: BodyType<ChatRoomUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateChatRoom(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateChatRoomMutationResult = NonNullable<Awaited<ReturnType<typeof updateChatRoom>>>
+    export type UpdateChatRoomMutationBody = BodyType<ChatRoomUpdate>
+    export type UpdateChatRoomMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update chat room (assign agent, close)
+ */
+export const useUpdateChatRoom = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChatRoom>>, TError,{id: number;data: BodyType<ChatRoomUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateChatRoom>>,
+        TError,
+        {id: number;data: BodyType<ChatRoomUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateChatRoomMutationOptions(options));
+    }
+
+export const getListInspectionsUrl = () => {
+
+
+
+
+  return `/api/inspections`
+}
+
+/**
+ * @summary List all inspections (admin)
+ */
+export const listInspections = async ( options?: RequestInit): Promise<Inspection[]> => {
+
+  return customFetch<Inspection[]>(getListInspectionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListInspectionsQueryKey = () => {
+    return [
+    `/api/inspections`
+    ] as const;
+    }
+
+
+export const getListInspectionsQueryOptions = <TData = Awaited<ReturnType<typeof listInspections>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listInspections>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListInspectionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listInspections>>> = ({ signal }) => listInspections({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listInspections>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListInspectionsQueryResult = NonNullable<Awaited<ReturnType<typeof listInspections>>>
+export type ListInspectionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all inspections (admin)
+ */
+
+export function useListInspections<TData = Awaited<ReturnType<typeof listInspections>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listInspections>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListInspectionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetMyInspectionsUrl = () => {
+
+
+
+
+  return `/api/inspections/my`
+}
+
+/**
+ * @summary Get current user inspections
+ */
+export const getMyInspections = async ( options?: RequestInit): Promise<Inspection[]> => {
+
+  return customFetch<Inspection[]>(getGetMyInspectionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyInspectionsQueryKey = () => {
+    return [
+    `/api/inspections/my`
+    ] as const;
+    }
+
+
+export const getGetMyInspectionsQueryOptions = <TData = Awaited<ReturnType<typeof getMyInspections>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyInspections>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyInspectionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyInspections>>> = ({ signal }) => getMyInspections({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyInspections>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyInspectionsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyInspections>>>
+export type GetMyInspectionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user inspections
+ */
+
+export function useGetMyInspections<TData = Awaited<ReturnType<typeof getMyInspections>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyInspections>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyInspectionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 

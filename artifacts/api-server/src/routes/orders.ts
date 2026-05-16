@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { ordersTable, carsTable, activityTable, paymentSettingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth, requireRole } from "../middlewares/auth";
+import { createInspectionForOrder } from "./inspections";
 
 const router = Router();
 
@@ -71,7 +72,6 @@ router.post("/", requireAuth, async (req, res) => {
       cardBrand: cardBrand ?? null,
     }).returning();
 
-    // Mark car as sold for full payment
     if (paymentType === "full") {
       await db.update(carsTable).set({ status: "sold" }).where(eq(carsTable.id, carId));
       await db.insert(activityTable).values({
@@ -90,6 +90,13 @@ router.post("/", requireAuth, async (req, res) => {
       userId: req.user!.id,
       carId,
     });
+
+    // Auto-schedule inspection for the order
+    try {
+      await createInspectionForOrder(order.id, req.user!.id, carId);
+    } catch (inspErr) {
+      req.log.warn({ err: inspErr }, "Failed to create inspection record (non-fatal)");
+    }
 
     res.status(201).json(await enrichOrder(order));
   } catch (err) {

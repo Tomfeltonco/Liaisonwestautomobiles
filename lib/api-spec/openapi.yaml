@@ -880,6 +880,180 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentSettings"
 
+  /admin/site-settings:
+    get:
+      operationId: getSiteSettings
+      tags: [admin]
+      summary: Get site settings (concierge contact)
+      responses:
+        "200":
+          description: Site settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+    patch:
+      operationId: updateSiteSettings
+      tags: [admin]
+      summary: Update site settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteSettingsUpdate"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+
+  /admin/site-settings/public:
+    get:
+      operationId: getPublicSiteSettings
+      tags: [admin]
+      summary: Get public site settings (no auth)
+      responses:
+        "200":
+          description: Public site settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+
+  /chat/rooms:
+    get:
+      operationId: listChatRooms
+      tags: [chat]
+      summary: List chat rooms
+      responses:
+        "200":
+          description: Chat rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatRoom"
+    post:
+      operationId: createChatRoom
+      tags: [chat]
+      summary: Create or reuse chat room
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRoomInput"
+      responses:
+        "201":
+          description: Chat room created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatRoom"
+
+  /chat/rooms/{id}/messages:
+    get:
+      operationId: getChatMessages
+      tags: [chat]
+      summary: Get messages in a room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send a message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+
+  /chat/rooms/{id}:
+    patch:
+      operationId: updateChatRoom
+      tags: [chat]
+      summary: Update chat room (assign agent, close)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRoomUpdate"
+      responses:
+        "200":
+          description: Updated room
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatRoom"
+
+  /inspections:
+    get:
+      operationId: listInspections
+      tags: [inspections]
+      summary: List all inspections (admin)
+      responses:
+        "200":
+          description: Inspections list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Inspection"
+
+  /inspections/my:
+    get:
+      operationId: getMyInspections
+      tags: [inspections]
+      summary: Get current user inspections
+      responses:
+        "200":
+          description: My inspections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Inspection"
+
 components:
   schemas:
     HealthStatus:
@@ -1541,3 +1715,147 @@ components:
           type: boolean
         fullPaymentEnabled:
           type: boolean
+
+    SiteSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        conciergeName:
+          type: string
+        conciergeTitle:
+          type: string
+        conciergePhone:
+          type: string
+        conciergeEmail:
+          type: string
+        conciergeAddress:
+          type: string
+        conciergeHours:
+          type: string
+        supportPhone:
+          type: string
+        supportEmail:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, conciergeName, conciergeTitle, conciergePhone, conciergeEmail, conciergeAddress, conciergeHours, supportPhone, supportEmail, updatedAt]
+
+    SiteSettingsUpdate:
+      type: object
+      properties:
+        conciergeName:
+          type: string
+        conciergeTitle:
+          type: string
+        conciergePhone:
+          type: string
+        conciergeEmail:
+          type: string
+        conciergeAddress:
+          type: string
+        conciergeHours:
+          type: string
+        supportPhone:
+          type: string
+        supportEmail:
+          type: string
+
+    ChatRoom:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        agentId:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [open, assigned, closed]
+        subject:
+          type: string
+        lastMessageAt:
+          type: string
+        createdAt:
+          type: string
+        userName:
+          type: ["string", "null"]
+        userEmail:
+          type: ["string", "null"]
+      required: [id, userId, status, subject, lastMessageAt, createdAt]
+
+    ChatRoomInput:
+      type: object
+      properties:
+        subject:
+          type: string
+
+    ChatRoomUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [open, assigned, closed]
+        agentId:
+          type: integer
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        senderId:
+          type: integer
+        senderRole:
+          type: string
+        senderName:
+          type: string
+        message:
+          type: string
+        createdAt:
+          type: string
+      required: [id, roomId, senderId, senderRole, senderName, message, createdAt]
+
+    ChatMessageInput:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    Inspection:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderId:
+          type: integer
+        userId:
+          type: integer
+        carId:
+          type: integer
+        reportNumber:
+          type: string
+        inspector:
+          type: string
+        inspectorTitle:
+          type: string
+        inspectionDate:
+          type: string
+        inspectionTime:
+          type: string
+        address:
+          type: string
+        status:
+          type: string
+          enum: [scheduled, in_progress, completed]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        car:
+          $ref: "#/components/schemas/Car"
+      required: [id, orderId, userId, carId, reportNumber, inspector, inspectorTitle, inspectionDate, inspectionTime, address, status, createdAt]

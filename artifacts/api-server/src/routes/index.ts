@@ -8,6 +8,8 @@ import loansRouter from "./loans";
 import cartRouter from "./cart";
 import ordersRouter from "./orders";
 import adminRouter from "./admin";
+import chatRouter from "./chat";
+import inspectionsRouter from "./inspections";
 
 const router: IRouter = Router();
 
@@ -20,5 +22,7 @@ router.use("/loans", loansRouter);
 router.use("/cart", cartRouter);
 router.use("/orders", ordersRouter);
 router.use("/admin", adminRouter);
+router.use("/chat", chatRouter);
+router.use("/inspections", inspectionsRouter);
 
 export default router;

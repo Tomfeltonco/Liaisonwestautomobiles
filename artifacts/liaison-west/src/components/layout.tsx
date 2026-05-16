@@ -4,6 +4,7 @@ import { LogOut, ShoppingCart, User, Menu, X, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useGetCart, getGetCartQueryKey } from "@workspace/api-client-react";
+import { ChatWidget } from "@/components/chat-widget";
 
 export function Navbar() {
   const [location] = useLocation();
@@ -174,6 +175,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <Footer />
+      <ChatWidget />
     </div>
   );
 }

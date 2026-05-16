@@ -1332,3 +1332,242 @@ export const UpdatePaymentSettingsResponse = zod.object({
 })
 
 
+/**
+ * @summary Get site settings (concierge contact)
+ */
+export const GetSiteSettingsResponse = zod.object({
+  "id": zod.number(),
+  "conciergeName": zod.string(),
+  "conciergeTitle": zod.string(),
+  "conciergePhone": zod.string(),
+  "conciergeEmail": zod.string(),
+  "conciergeAddress": zod.string(),
+  "conciergeHours": zod.string(),
+  "supportPhone": zod.string(),
+  "supportEmail": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Update site settings
+ */
+export const UpdateSiteSettingsBody = zod.object({
+  "conciergeName": zod.string().optional(),
+  "conciergeTitle": zod.string().optional(),
+  "conciergePhone": zod.string().optional(),
+  "conciergeEmail": zod.string().optional(),
+  "conciergeAddress": zod.string().optional(),
+  "conciergeHours": zod.string().optional(),
+  "supportPhone": zod.string().optional(),
+  "supportEmail": zod.string().optional()
+})
+
+export const UpdateSiteSettingsResponse = zod.object({
+  "id": zod.number(),
+  "conciergeName": zod.string(),
+  "conciergeTitle": zod.string(),
+  "conciergePhone": zod.string(),
+  "conciergeEmail": zod.string(),
+  "conciergeAddress": zod.string(),
+  "conciergeHours": zod.string(),
+  "supportPhone": zod.string(),
+  "supportEmail": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Get public site settings (no auth)
+ */
+export const GetPublicSiteSettingsResponse = zod.object({
+  "id": zod.number(),
+  "conciergeName": zod.string(),
+  "conciergeTitle": zod.string(),
+  "conciergePhone": zod.string(),
+  "conciergeEmail": zod.string(),
+  "conciergeAddress": zod.string(),
+  "conciergeHours": zod.string(),
+  "supportPhone": zod.string(),
+  "supportEmail": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary List chat rooms
+ */
+export const ListChatRoomsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "agentId": zod.number().nullish(),
+  "status": zod.enum(['open', 'assigned', 'closed']),
+  "subject": zod.string(),
+  "lastMessageAt": zod.string(),
+  "createdAt": zod.string(),
+  "userName": zod.string().nullish(),
+  "userEmail": zod.string().nullish()
+})
+export const ListChatRoomsResponse = zod.array(ListChatRoomsResponseItem)
+
+
+/**
+ * @summary Create or reuse chat room
+ */
+export const CreateChatRoomBody = zod.object({
+  "subject": zod.string().optional()
+})
+
+
+/**
+ * @summary Get messages in a room
+ */
+export const GetChatMessagesParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetChatMessagesResponseItem = zod.object({
+  "id": zod.number(),
+  "roomId": zod.number(),
+  "senderId": zod.number(),
+  "senderRole": zod.string(),
+  "senderName": zod.string(),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})
+export const GetChatMessagesResponse = zod.array(GetChatMessagesResponseItem)
+
+
+/**
+ * @summary Send a message
+ */
+export const SendChatMessageParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const SendChatMessageBody = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Update chat room (assign agent, close)
+ */
+export const UpdateChatRoomParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateChatRoomBody = zod.object({
+  "status": zod.enum(['open', 'assigned', 'closed']).optional(),
+  "agentId": zod.number().optional()
+})
+
+export const UpdateChatRoomResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "agentId": zod.number().nullish(),
+  "status": zod.enum(['open', 'assigned', 'closed']),
+  "subject": zod.string(),
+  "lastMessageAt": zod.string(),
+  "createdAt": zod.string(),
+  "userName": zod.string().nullish(),
+  "userEmail": zod.string().nullish()
+})
+
+
+/**
+ * @summary List all inspections (admin)
+ */
+export const ListInspectionsResponseItem = zod.object({
+  "id": zod.number(),
+  "orderId": zod.number(),
+  "userId": zod.number(),
+  "carId": zod.number(),
+  "reportNumber": zod.string(),
+  "inspector": zod.string(),
+  "inspectorTitle": zod.string(),
+  "inspectionDate": zod.string(),
+  "inspectionTime": zod.string(),
+  "address": zod.string(),
+  "status": zod.enum(['scheduled', 'in_progress', 'completed']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "car": zod.object({
+  "id": zod.number(),
+  "make": zod.string(),
+  "model": zod.string(),
+  "year": zod.number(),
+  "price": zod.number(),
+  "mileage": zod.number(),
+  "color": zod.string(),
+  "condition": zod.enum(['new', 'used', 'certified']),
+  "bodyType": zod.string(),
+  "transmission": zod.enum(['automatic', 'manual', 'cvt']),
+  "fuelType": zod.enum(['gasoline', 'diesel', 'electric', 'hybrid', 'plug_in_hybrid']),
+  "engine": zod.string().nullish(),
+  "horsepower": zod.number().nullish(),
+  "seatingCapacity": zod.number().nullish(),
+  "vin": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "features": zod.array(zod.string()),
+  "images": zod.array(zod.string()),
+  "status": zod.enum(['available', 'sold', 'reserved', 'pending']),
+  "isFeatured": zod.boolean(),
+  "monthlyPayment": zod.number().nullish(),
+  "downPayment": zod.number().nullish(),
+  "agentId": zod.number().nullish(),
+  "agentName": zod.string().nullish(),
+  "createdAt": zod.string()
+}).optional()
+})
+export const ListInspectionsResponse = zod.array(ListInspectionsResponseItem)
+
+
+/**
+ * @summary Get current user inspections
+ */
+export const GetMyInspectionsResponseItem = zod.object({
+  "id": zod.number(),
+  "orderId": zod.number(),
+  "userId": zod.number(),
+  "carId": zod.number(),
+  "reportNumber": zod.string(),
+  "inspector": zod.string(),
+  "inspectorTitle": zod.string(),
+  "inspectionDate": zod.string(),
+  "inspectionTime": zod.string(),
+  "address": zod.string(),
+  "status": zod.enum(['scheduled', 'in_progress', 'completed']),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "car": zod.object({
+  "id": zod.number(),
+  "make": zod.string(),
+  "model": zod.string(),
+  "year": zod.number(),
+  "price": zod.number(),
+  "mileage": zod.number(),
+  "color": zod.string(),
+  "condition": zod.enum(['new', 'used', 'certified']),
+  "bodyType": zod.string(),
+  "transmission": zod.enum(['automatic', 'manual', 'cvt']),
+  "fuelType": zod.enum(['gasoline', 'diesel', 'electric', 'hybrid', 'plug_in_hybrid']),
+  "engine": zod.string().nullish(),
+  "horsepower": zod.number().nullish(),
+  "seatingCapacity": zod.number().nullish(),
+  "vin": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "features": zod.array(zod.string()),
+  "images": zod.array(zod.string()),
+  "status": zod.enum(['available', 'sold', 'reserved', 'pending']),
+  "isFeatured": zod.boolean(),
+  "monthlyPayment": zod.number().nullish(),
+  "downPayment": zod.number().nullish(),
+  "agentId": zod.number().nullish(),
+  "agentName": zod.string().nullish(),
+  "createdAt": zod.string()
+}).optional()
+})
+export const GetMyInspectionsResponse = zod.array(GetMyInspectionsResponseItem)
+
+

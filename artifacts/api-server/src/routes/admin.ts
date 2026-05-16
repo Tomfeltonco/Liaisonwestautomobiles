@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import {
   usersTable, carsTable, ordersTable, loansTable,
-  activityTable, paymentSettingsTable
+  activityTable, paymentSettingsTable, siteSettingsTable
 } from "@workspace/db";
 import { eq, sql, gte } from "drizzle-orm";
 import { requireAuth, requireRole } from "../middlewares/auth";
@@ -78,24 +78,61 @@ router.get("/payment-settings", requireAuth, requireRole("admin"), async (req, r
 router.patch("/payment-settings", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     let [existing] = await db.select().from(paymentSettingsTable).limit(1);
-
     if (!existing) {
       [existing] = await db.insert(paymentSettingsTable).values({}).returning();
     }
-
-    const updates = {
-      ...req.body,
-      updatedAt: new Date(),
-    };
-
     const [updated] = await db.update(paymentSettingsTable)
-      .set(updates)
+      .set({ ...req.body, updatedAt: new Date() })
       .where(eq(paymentSettingsTable.id, existing.id))
       .returning();
-
     res.json({ ...updated, updatedAt: updated.updatedAt.toISOString() });
   } catch (err) {
     req.log.error({ err }, "Update payment settings error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/admin/site-settings
+router.get("/site-settings", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    let [settings] = await db.select().from(siteSettingsTable).limit(1);
+    if (!settings) {
+      [settings] = await db.insert(siteSettingsTable).values({}).returning();
+    }
+    res.json({ ...settings, updatedAt: settings.updatedAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Site settings error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PATCH /api/admin/site-settings
+router.patch("/site-settings", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    let [existing] = await db.select().from(siteSettingsTable).limit(1);
+    if (!existing) {
+      [existing] = await db.insert(siteSettingsTable).values({}).returning();
+    }
+    const [updated] = await db.update(siteSettingsTable)
+      .set({ ...req.body, updatedAt: new Date() })
+      .where(eq(siteSettingsTable.id, existing.id))
+      .returning();
+    res.json({ ...updated, updatedAt: updated.updatedAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Update site settings error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/admin/site-settings/public — no auth required
+router.get("/site-settings/public", async (req, res) => {
+  try {
+    let [settings] = await db.select().from(siteSettingsTable).limit(1);
+    if (!settings) {
+      [settings] = await db.insert(siteSettingsTable).values({}).returning();
+    }
+    res.json({ ...settings, updatedAt: settings.updatedAt.toISOString() });
+  } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
 });
