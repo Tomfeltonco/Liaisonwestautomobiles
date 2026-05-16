@@ -36,6 +36,8 @@ export function Navbar() {
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
               <Link href="/inventory" className={`hover:text-white transition-colors ${location === "/inventory" ? "text-white" : ""}`}>INVENTORY</Link>
               <Link href="/finance" className={`hover:text-white transition-colors ${location === "/finance" ? "text-white" : ""}`}>FINANCING</Link>
+              <Link href="/inspection" className={`hover:text-white transition-colors ${location === "/inspection" ? "text-white" : ""}`}>INSPECTION</Link>
+              <Link href="/auction" className={`hover:text-white transition-colors ${location === "/auction" ? "text-white" : ""}`}>AUCTION</Link>
             </div>
           </div>
 
@@ -94,6 +96,8 @@ export function Navbar() {
         <div className="md:hidden border-t border-white/10 bg-background/95 backdrop-blur-md px-4 py-4 space-y-4">
           <Link href="/inventory" className="block text-sm font-medium text-white">INVENTORY</Link>
           <Link href="/finance" className="block text-sm font-medium text-white">FINANCING</Link>
+          <Link href="/inspection" className="block text-sm font-medium text-white">INSPECTION</Link>
+          <Link href="/auction" className="block text-sm font-medium text-white">AUCTION</Link>
           <div className="h-px bg-white/10 my-2"></div>
           {user ? (
             <>

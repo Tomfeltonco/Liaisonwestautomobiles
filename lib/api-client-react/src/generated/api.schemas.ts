@@ -455,6 +455,14 @@ export const OrderPaymentStatus = {
   failed: 'failed',
 } as const;
 
+export type OrderDeliveryMethod = typeof OrderDeliveryMethod[keyof typeof OrderDeliveryMethod];
+
+
+export const OrderDeliveryMethod = {
+  pickup: 'pickup',
+  delivery: 'delivery',
+} as const;
+
 export interface Order {
   id: number;
   userId: number;
@@ -472,6 +480,10 @@ export interface Order {
   paymentStatus: OrderPaymentStatus;
   /** @nullable */
   transactionId?: string | null;
+  deliveryMethod: OrderDeliveryMethod;
+  /** @nullable */
+  deliveryAddress?: string | null;
+  shippingFee: number;
   createdAt: string;
 }
 
@@ -483,6 +495,14 @@ export const OrderInputPaymentType = {
   installment: 'installment',
 } as const;
 
+export type OrderInputDeliveryMethod = typeof OrderInputDeliveryMethod[keyof typeof OrderInputDeliveryMethod];
+
+
+export const OrderInputDeliveryMethod = {
+  pickup: 'pickup',
+  delivery: 'delivery',
+} as const;
+
 export interface OrderInput {
   carId: number;
   paymentType: OrderInputPaymentType;
@@ -490,6 +510,21 @@ export interface OrderInput {
   termMonths?: number;
   cardLast4?: string;
   cardBrand?: string;
+  deliveryMethod?: OrderInputDeliveryMethod;
+  shippingFee?: number;
+}
+
+export type DeliveryUpdateDeliveryMethod = typeof DeliveryUpdateDeliveryMethod[keyof typeof DeliveryUpdateDeliveryMethod];
+
+
+export const DeliveryUpdateDeliveryMethod = {
+  pickup: 'pickup',
+  delivery: 'delivery',
+} as const;
+
+export interface DeliveryUpdate {
+  deliveryMethod: DeliveryUpdateDeliveryMethod;
+  deliveryAddress?: string;
 }
 
 export type OrderUpdateStatus = typeof OrderUpdateStatus[keyof typeof OrderUpdateStatus];
@@ -585,6 +620,8 @@ export interface SiteSettings {
   conciergeHours: string;
   supportPhone: string;
   supportEmail: string;
+  shippingFee: number;
+  inspectionBookingFee: number;
   updatedAt: string;
 }
 
@@ -597,6 +634,8 @@ export interface SiteSettingsUpdate {
   conciergeHours?: string;
   supportPhone?: string;
   supportEmail?: string;
+  shippingFee?: number;
+  inspectionBookingFee?: number;
 }
 
 export type ChatRoomStatus = typeof ChatRoomStatus[keyof typeof ChatRoomStatus];
@@ -680,6 +719,97 @@ export interface Inspection {
   notes?: string | null;
   createdAt: string;
   car?: Car;
+}
+
+export interface InspectionBooking {
+  id: number;
+  userId: number;
+  preferredDate: string;
+  preferredTime: string;
+  inspectionType: string;
+  fee: number;
+  status: string;
+  paymentStatus: string;
+  /** @nullable */
+  transactionId?: string | null;
+  /** @nullable */
+  cardLast4?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface InspectionBookingInput {
+  preferredDate: string;
+  preferredTime: string;
+  inspectionType: string;
+  notes?: string;
+  cardLast4?: string;
+}
+
+export interface AuctionBid {
+  id: number;
+  auctionId: number;
+  userId: number;
+  bidAmount: number;
+  createdAt: string;
+  userName: string;
+  /** @nullable */
+  userEmail?: string | null;
+}
+
+export interface AuctionBidInput {
+  bidAmount: number;
+}
+
+export interface AuctionDetail {
+  id: number;
+  carId: number;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  startingPrice: number;
+  /** @nullable */
+  currentBid?: number | null;
+  /** @nullable */
+  reservePrice?: number | null;
+  /** @nullable */
+  buyNowPrice?: number | null;
+  endAt: string;
+  status: string;
+  createdBy: number;
+  /** @nullable */
+  winnerId?: number | null;
+  /** @nullable */
+  winnerBid?: number | null;
+  createdAt: string;
+  car?: Car;
+  bids: AuctionBid[];
+  bidCount: number;
+  timeRemaining: number;
+}
+
+export interface AuctionInput {
+  carId: number;
+  title: string;
+  description?: string;
+  startingPrice: number;
+  reservePrice?: number;
+  buyNowPrice?: number;
+  durationHours: number;
+}
+
+export interface AuctionUpdate {
+  startingPrice?: number;
+  reservePrice?: number;
+  buyNowPrice?: number;
+  status?: string;
+  endAt?: string;
+}
+
+export interface InspectionBookingUpdate {
+  status?: string;
+  notes?: string;
 }
 
 export type ListCarsParams = {

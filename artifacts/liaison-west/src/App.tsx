@@ -27,6 +27,10 @@ import AdminLoans from "@/pages/admin-loans";
 import AdminPaymentSettings from "@/pages/admin-payment-settings";
 import AdminSettings from "@/pages/admin-settings";
 import AdminChat from "@/pages/admin-chat";
+import Inspection from "@/pages/inspection";
+import AuctionPage from "@/pages/auction";
+import AdminAuctions from "@/pages/admin-auctions";
+import AdminInspectionBookings from "@/pages/admin-inspection-bookings";
 
 // Attach the stored token to every API request as a Bearer header
 setAuthTokenGetter(() => localStorage.getItem("lw_token"));
@@ -64,6 +68,10 @@ function Router() {
       <Route path="/admin/payment-settings" component={AdminPaymentSettings} />
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/chat" component={AdminChat} />
+      <Route path="/admin/auctions" component={AdminAuctions} />
+      <Route path="/admin/inspection-bookings" component={AdminInspectionBookings} />
+      <Route path="/inspection" component={Inspection} />
+      <Route path="/auction" component={AuctionPage} />
       <Route component={NotFound} />
     </Switch>
   );

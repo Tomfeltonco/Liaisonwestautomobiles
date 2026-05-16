@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, real, timestamp } from "drizzle-orm/pg-core";
 
 export const siteSettingsTable = pgTable("site_settings", {
   id: serial("id").primaryKey(),
@@ -10,6 +10,8 @@ export const siteSettingsTable = pgTable("site_settings", {
   conciergeHours: text("concierge_hours").notNull().default("Mon–Sat  9:00 AM – 7:00 PM PST"),
   supportPhone: text("support_phone").notNull().default("+1 (310) 555-0100"),
   supportEmail: text("support_email").notNull().default("support@liaisonwest.com"),
+  shippingFee: real("shipping_fee").notNull().default(499),
+  inspectionBookingFee: real("inspection_booking_fee").notNull().default(299),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

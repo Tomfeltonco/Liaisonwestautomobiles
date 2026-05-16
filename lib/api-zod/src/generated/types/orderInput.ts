@@ -5,6 +5,7 @@
  * Liaison West Automobiles API
  * OpenAPI spec version: 0.1.0
  */
+import type { OrderInputDeliveryMethod } from './orderInputDeliveryMethod';
 import type { OrderInputPaymentType } from './orderInputPaymentType';
 
 export interface OrderInput {
@@ -14,4 +15,6 @@ export interface OrderInput {
   termMonths?: number;
   cardLast4?: string;
   cardBrand?: string;
+  deliveryMethod?: OrderInputDeliveryMethod;
+  shippingFee?: number;
 }

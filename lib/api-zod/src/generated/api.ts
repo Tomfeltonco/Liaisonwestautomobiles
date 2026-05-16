@@ -1092,6 +1092,9 @@ export const ListOrdersResponseItem = zod.object({
   "status": zod.enum(['pending', 'processing', 'approved', 'completed', 'cancelled']),
   "paymentStatus": zod.enum(['pending', 'partial', 'paid', 'failed']),
   "transactionId": zod.string().nullish(),
+  "deliveryMethod": zod.enum(['pickup', 'delivery']),
+  "deliveryAddress": zod.string().nullish(),
+  "shippingFee": zod.number(),
   "createdAt": zod.string()
 })
 export const ListOrdersResponse = zod.array(ListOrdersResponseItem)
@@ -1106,7 +1109,9 @@ export const CreateOrderBody = zod.object({
   "downPayment": zod.number().optional(),
   "termMonths": zod.number().optional(),
   "cardLast4": zod.string().optional(),
-  "cardBrand": zod.string().optional()
+  "cardBrand": zod.string().optional(),
+  "deliveryMethod": zod.enum(['pickup', 'delivery']).optional(),
+  "shippingFee": zod.number().optional()
 })
 
 
@@ -1152,6 +1157,9 @@ export const GetMyOrdersResponseItem = zod.object({
   "status": zod.enum(['pending', 'processing', 'approved', 'completed', 'cancelled']),
   "paymentStatus": zod.enum(['pending', 'partial', 'paid', 'failed']),
   "transactionId": zod.string().nullish(),
+  "deliveryMethod": zod.enum(['pickup', 'delivery']),
+  "deliveryAddress": zod.string().nullish(),
+  "shippingFee": zod.number(),
   "createdAt": zod.string()
 })
 export const GetMyOrdersResponse = zod.array(GetMyOrdersResponseItem)
@@ -1203,6 +1211,9 @@ export const GetOrderResponse = zod.object({
   "status": zod.enum(['pending', 'processing', 'approved', 'completed', 'cancelled']),
   "paymentStatus": zod.enum(['pending', 'partial', 'paid', 'failed']),
   "transactionId": zod.string().nullish(),
+  "deliveryMethod": zod.enum(['pickup', 'delivery']),
+  "deliveryAddress": zod.string().nullish(),
+  "shippingFee": zod.number(),
   "createdAt": zod.string()
 })
 
@@ -1259,6 +1270,9 @@ export const UpdateOrderResponse = zod.object({
   "status": zod.enum(['pending', 'processing', 'approved', 'completed', 'cancelled']),
   "paymentStatus": zod.enum(['pending', 'partial', 'paid', 'failed']),
   "transactionId": zod.string().nullish(),
+  "deliveryMethod": zod.enum(['pickup', 'delivery']),
+  "deliveryAddress": zod.string().nullish(),
+  "shippingFee": zod.number(),
   "createdAt": zod.string()
 })
 
@@ -1345,6 +1359,8 @@ export const GetSiteSettingsResponse = zod.object({
   "conciergeHours": zod.string(),
   "supportPhone": zod.string(),
   "supportEmail": zod.string(),
+  "shippingFee": zod.number(),
+  "inspectionBookingFee": zod.number(),
   "updatedAt": zod.string()
 })
 
@@ -1360,7 +1376,9 @@ export const UpdateSiteSettingsBody = zod.object({
   "conciergeAddress": zod.string().optional(),
   "conciergeHours": zod.string().optional(),
   "supportPhone": zod.string().optional(),
-  "supportEmail": zod.string().optional()
+  "supportEmail": zod.string().optional(),
+  "shippingFee": zod.number().optional(),
+  "inspectionBookingFee": zod.number().optional()
 })
 
 export const UpdateSiteSettingsResponse = zod.object({
@@ -1373,6 +1391,8 @@ export const UpdateSiteSettingsResponse = zod.object({
   "conciergeHours": zod.string(),
   "supportPhone": zod.string(),
   "supportEmail": zod.string(),
+  "shippingFee": zod.number(),
+  "inspectionBookingFee": zod.number(),
   "updatedAt": zod.string()
 })
 
@@ -1390,6 +1410,8 @@ export const GetPublicSiteSettingsResponse = zod.object({
   "conciergeHours": zod.string(),
   "supportPhone": zod.string(),
   "supportEmail": zod.string(),
+  "shippingFee": zod.number(),
+  "inspectionBookingFee": zod.number(),
   "updatedAt": zod.string()
 })
 
@@ -1569,5 +1591,363 @@ export const GetMyInspectionsResponseItem = zod.object({
 }).optional()
 })
 export const GetMyInspectionsResponse = zod.array(GetMyInspectionsResponseItem)
+
+
+/**
+ * @summary Update delivery method for an order
+ */
+export const UpdateOrderDeliveryParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateOrderDeliveryBody = zod.object({
+  "deliveryMethod": zod.enum(['pickup', 'delivery']),
+  "deliveryAddress": zod.string().optional()
+})
+
+export const UpdateOrderDeliveryResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "carId": zod.number(),
+  "car": zod.object({
+  "id": zod.number(),
+  "make": zod.string(),
+  "model": zod.string(),
+  "year": zod.number(),
+  "price": zod.number(),
+  "mileage": zod.number(),
+  "color": zod.string(),
+  "condition": zod.enum(['new', 'used', 'certified']),
+  "bodyType": zod.string(),
+  "transmission": zod.enum(['automatic', 'manual', 'cvt']),
+  "fuelType": zod.enum(['gasoline', 'diesel', 'electric', 'hybrid', 'plug_in_hybrid']),
+  "engine": zod.string().nullish(),
+  "horsepower": zod.number().nullish(),
+  "seatingCapacity": zod.number().nullish(),
+  "vin": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "features": zod.array(zod.string()),
+  "images": zod.array(zod.string()),
+  "status": zod.enum(['available', 'sold', 'reserved', 'pending']),
+  "isFeatured": zod.boolean(),
+  "monthlyPayment": zod.number().nullish(),
+  "downPayment": zod.number().nullish(),
+  "agentId": zod.number().nullish(),
+  "agentName": zod.string().nullish(),
+  "createdAt": zod.string()
+}).optional(),
+  "paymentType": zod.enum(['full', 'installment']),
+  "totalAmount": zod.number(),
+  "downPayment": zod.number().nullish(),
+  "monthlyPayment": zod.number().nullish(),
+  "termMonths": zod.number().nullish(),
+  "status": zod.enum(['pending', 'processing', 'approved', 'completed', 'cancelled']),
+  "paymentStatus": zod.enum(['pending', 'partial', 'paid', 'failed']),
+  "transactionId": zod.string().nullish(),
+  "deliveryMethod": zod.enum(['pickup', 'delivery']),
+  "deliveryAddress": zod.string().nullish(),
+  "shippingFee": zod.number(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List all inspection bookings (admin)
+ */
+export const ListInspectionBookingsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "preferredDate": zod.string(),
+  "preferredTime": zod.string(),
+  "inspectionType": zod.string(),
+  "fee": zod.number(),
+  "status": zod.string(),
+  "paymentStatus": zod.string(),
+  "transactionId": zod.string().nullish(),
+  "cardLast4": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListInspectionBookingsResponse = zod.array(ListInspectionBookingsResponseItem)
+
+
+/**
+ * @summary Book an inspection
+ */
+export const CreateInspectionBookingBody = zod.object({
+  "preferredDate": zod.string(),
+  "preferredTime": zod.string(),
+  "inspectionType": zod.string(),
+  "notes": zod.string().optional(),
+  "cardLast4": zod.string().optional()
+})
+
+
+/**
+ * @summary Get my inspection bookings
+ */
+export const GetMyInspectionBookingsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "preferredDate": zod.string(),
+  "preferredTime": zod.string(),
+  "inspectionType": zod.string(),
+  "fee": zod.number(),
+  "status": zod.string(),
+  "paymentStatus": zod.string(),
+  "transactionId": zod.string().nullish(),
+  "cardLast4": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const GetMyInspectionBookingsResponse = zod.array(GetMyInspectionBookingsResponseItem)
+
+
+/**
+ * @summary Update inspection booking status (admin)
+ */
+export const UpdateInspectionBookingParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateInspectionBookingBody = zod.object({
+  "status": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+export const UpdateInspectionBookingResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "preferredDate": zod.string(),
+  "preferredTime": zod.string(),
+  "inspectionType": zod.string(),
+  "fee": zod.number(),
+  "status": zod.string(),
+  "paymentStatus": zod.string(),
+  "transactionId": zod.string().nullish(),
+  "cardLast4": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List auctions
+ */
+export const ListAuctionsResponseItem = zod.object({
+  "id": zod.number(),
+  "carId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "startingPrice": zod.number(),
+  "currentBid": zod.number().nullish(),
+  "reservePrice": zod.number().nullish(),
+  "buyNowPrice": zod.number().nullish(),
+  "endAt": zod.string(),
+  "status": zod.string(),
+  "createdBy": zod.number(),
+  "winnerId": zod.number().nullish(),
+  "winnerBid": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "car": zod.object({
+  "id": zod.number(),
+  "make": zod.string(),
+  "model": zod.string(),
+  "year": zod.number(),
+  "price": zod.number(),
+  "mileage": zod.number(),
+  "color": zod.string(),
+  "condition": zod.enum(['new', 'used', 'certified']),
+  "bodyType": zod.string(),
+  "transmission": zod.enum(['automatic', 'manual', 'cvt']),
+  "fuelType": zod.enum(['gasoline', 'diesel', 'electric', 'hybrid', 'plug_in_hybrid']),
+  "engine": zod.string().nullish(),
+  "horsepower": zod.number().nullish(),
+  "seatingCapacity": zod.number().nullish(),
+  "vin": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "features": zod.array(zod.string()),
+  "images": zod.array(zod.string()),
+  "status": zod.enum(['available', 'sold', 'reserved', 'pending']),
+  "isFeatured": zod.boolean(),
+  "monthlyPayment": zod.number().nullish(),
+  "downPayment": zod.number().nullish(),
+  "agentId": zod.number().nullish(),
+  "agentName": zod.string().nullish(),
+  "createdAt": zod.string()
+}).optional(),
+  "bids": zod.array(zod.object({
+  "id": zod.number(),
+  "auctionId": zod.number(),
+  "userId": zod.number(),
+  "bidAmount": zod.number(),
+  "createdAt": zod.string(),
+  "userName": zod.string(),
+  "userEmail": zod.string().nullish()
+})),
+  "bidCount": zod.number(),
+  "timeRemaining": zod.number()
+})
+export const ListAuctionsResponse = zod.array(ListAuctionsResponseItem)
+
+
+/**
+ * @summary Create auction (admin/agent)
+ */
+export const CreateAuctionBody = zod.object({
+  "carId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().optional(),
+  "startingPrice": zod.number(),
+  "reservePrice": zod.number().optional(),
+  "buyNowPrice": zod.number().optional(),
+  "durationHours": zod.number()
+})
+
+
+/**
+ * @summary Get auction detail
+ */
+export const GetAuctionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetAuctionResponse = zod.object({
+  "id": zod.number(),
+  "carId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "startingPrice": zod.number(),
+  "currentBid": zod.number().nullish(),
+  "reservePrice": zod.number().nullish(),
+  "buyNowPrice": zod.number().nullish(),
+  "endAt": zod.string(),
+  "status": zod.string(),
+  "createdBy": zod.number(),
+  "winnerId": zod.number().nullish(),
+  "winnerBid": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "car": zod.object({
+  "id": zod.number(),
+  "make": zod.string(),
+  "model": zod.string(),
+  "year": zod.number(),
+  "price": zod.number(),
+  "mileage": zod.number(),
+  "color": zod.string(),
+  "condition": zod.enum(['new', 'used', 'certified']),
+  "bodyType": zod.string(),
+  "transmission": zod.enum(['automatic', 'manual', 'cvt']),
+  "fuelType": zod.enum(['gasoline', 'diesel', 'electric', 'hybrid', 'plug_in_hybrid']),
+  "engine": zod.string().nullish(),
+  "horsepower": zod.number().nullish(),
+  "seatingCapacity": zod.number().nullish(),
+  "vin": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "features": zod.array(zod.string()),
+  "images": zod.array(zod.string()),
+  "status": zod.enum(['available', 'sold', 'reserved', 'pending']),
+  "isFeatured": zod.boolean(),
+  "monthlyPayment": zod.number().nullish(),
+  "downPayment": zod.number().nullish(),
+  "agentId": zod.number().nullish(),
+  "agentName": zod.string().nullish(),
+  "createdAt": zod.string()
+}).optional(),
+  "bids": zod.array(zod.object({
+  "id": zod.number(),
+  "auctionId": zod.number(),
+  "userId": zod.number(),
+  "bidAmount": zod.number(),
+  "createdAt": zod.string(),
+  "userName": zod.string(),
+  "userEmail": zod.string().nullish()
+})),
+  "bidCount": zod.number(),
+  "timeRemaining": zod.number()
+})
+
+
+/**
+ * @summary Update auction (admin)
+ */
+export const UpdateAuctionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAuctionBody = zod.object({
+  "startingPrice": zod.number().optional(),
+  "reservePrice": zod.number().optional(),
+  "buyNowPrice": zod.number().optional(),
+  "status": zod.string().optional(),
+  "endAt": zod.string().optional()
+})
+
+export const UpdateAuctionResponse = zod.object({
+  "id": zod.number(),
+  "carId": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "startingPrice": zod.number(),
+  "currentBid": zod.number().nullish(),
+  "reservePrice": zod.number().nullish(),
+  "buyNowPrice": zod.number().nullish(),
+  "endAt": zod.string(),
+  "status": zod.string(),
+  "createdBy": zod.number(),
+  "winnerId": zod.number().nullish(),
+  "winnerBid": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "car": zod.object({
+  "id": zod.number(),
+  "make": zod.string(),
+  "model": zod.string(),
+  "year": zod.number(),
+  "price": zod.number(),
+  "mileage": zod.number(),
+  "color": zod.string(),
+  "condition": zod.enum(['new', 'used', 'certified']),
+  "bodyType": zod.string(),
+  "transmission": zod.enum(['automatic', 'manual', 'cvt']),
+  "fuelType": zod.enum(['gasoline', 'diesel', 'electric', 'hybrid', 'plug_in_hybrid']),
+  "engine": zod.string().nullish(),
+  "horsepower": zod.number().nullish(),
+  "seatingCapacity": zod.number().nullish(),
+  "vin": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "features": zod.array(zod.string()),
+  "images": zod.array(zod.string()),
+  "status": zod.enum(['available', 'sold', 'reserved', 'pending']),
+  "isFeatured": zod.boolean(),
+  "monthlyPayment": zod.number().nullish(),
+  "downPayment": zod.number().nullish(),
+  "agentId": zod.number().nullish(),
+  "agentName": zod.string().nullish(),
+  "createdAt": zod.string()
+}).optional(),
+  "bids": zod.array(zod.object({
+  "id": zod.number(),
+  "auctionId": zod.number(),
+  "userId": zod.number(),
+  "bidAmount": zod.number(),
+  "createdAt": zod.string(),
+  "userName": zod.string(),
+  "userEmail": zod.string().nullish()
+})),
+  "bidCount": zod.number(),
+  "timeRemaining": zod.number()
+})
+
+
+/**
+ * @summary Place a bid
+ */
+export const PlaceBidParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlaceBidBody = zod.object({
+  "bidAmount": zod.number()
+})
 
 

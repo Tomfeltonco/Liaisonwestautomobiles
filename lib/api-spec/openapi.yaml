@@ -1054,6 +1054,202 @@ paths:
                 items:
                   $ref: "#/components/schemas/Inspection"
 
+  /orders/{id}/delivery:
+    patch:
+      operationId: updateOrderDelivery
+      tags: [orders]
+      summary: Update delivery method for an order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliveryUpdate"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /inspection-bookings:
+    get:
+      operationId: listInspectionBookings
+      tags: [inspection-bookings]
+      summary: List all inspection bookings (admin)
+      responses:
+        "200":
+          description: Inspection bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InspectionBooking"
+    post:
+      operationId: createInspectionBooking
+      tags: [inspection-bookings]
+      summary: Book an inspection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InspectionBookingInput"
+      responses:
+        "201":
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectionBooking"
+
+  /inspection-bookings/my:
+    get:
+      operationId: getMyInspectionBookings
+      tags: [inspection-bookings]
+      summary: Get my inspection bookings
+      responses:
+        "200":
+          description: My bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InspectionBooking"
+
+  /inspection-bookings/{id}:
+    patch:
+      operationId: updateInspectionBooking
+      tags: [inspection-bookings]
+      summary: Update inspection booking status (admin)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InspectionBookingUpdate"
+      responses:
+        "200":
+          description: Updated booking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectionBooking"
+
+  /auctions:
+    get:
+      operationId: listAuctions
+      tags: [auctions]
+      summary: List auctions
+      responses:
+        "200":
+          description: Auctions list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuctionDetail"
+    post:
+      operationId: createAuction
+      tags: [auctions]
+      summary: Create auction (admin/agent)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuctionInput"
+      responses:
+        "201":
+          description: Auction created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionDetail"
+
+  /auctions/{id}:
+    get:
+      operationId: getAuction
+      tags: [auctions]
+      summary: Get auction detail
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Auction detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionDetail"
+    patch:
+      operationId: updateAuction
+      tags: [auctions]
+      summary: Update auction (admin)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuctionUpdate"
+      responses:
+        "200":
+          description: Updated auction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionDetail"
+
+  /auctions/{id}/bid:
+    post:
+      operationId: placeBid
+      tags: [auctions]
+      summary: Place a bid
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuctionBidInput"
+      responses:
+        "201":
+          description: Bid placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionBid"
+
 components:
   schemas:
     HealthStatus:
@@ -1598,9 +1794,16 @@ components:
           enum: [pending, partial, paid, failed]
         transactionId:
           type: ["string", "null"]
+        deliveryMethod:
+          type: string
+          enum: [pickup, delivery]
+        deliveryAddress:
+          type: ["string", "null"]
+        shippingFee:
+          type: number
         createdAt:
           type: string
-      required: [id, userId, carId, paymentType, totalAmount, status, paymentStatus, createdAt]
+      required: [id, userId, carId, paymentType, totalAmount, status, paymentStatus, deliveryMethod, shippingFee, createdAt]
 
     OrderInput:
       type: object
@@ -1618,7 +1821,22 @@ components:
           type: string
         cardBrand:
           type: string
+        deliveryMethod:
+          type: string
+          enum: [pickup, delivery]
+        shippingFee:
+          type: number
       required: [carId, paymentType]
+
+    DeliveryUpdate:
+      type: object
+      properties:
+        deliveryMethod:
+          type: string
+          enum: [pickup, delivery]
+        deliveryAddress:
+          type: string
+      required: [deliveryMethod]
 
     OrderUpdate:
       type: object
@@ -1737,9 +1955,13 @@ components:
           type: string
         supportEmail:
           type: string
+        shippingFee:
+          type: number
+        inspectionBookingFee:
+          type: number
         updatedAt:
           type: string
-      required: [id, conciergeName, conciergeTitle, conciergePhone, conciergeEmail, conciergeAddress, conciergeHours, supportPhone, supportEmail, updatedAt]
+      required: [id, conciergeName, conciergeTitle, conciergePhone, conciergeEmail, conciergeAddress, conciergeHours, supportPhone, supportEmail, shippingFee, inspectionBookingFee, updatedAt]
 
     SiteSettingsUpdate:
       type: object
@@ -1760,6 +1982,10 @@ components:
           type: string
         supportEmail:
           type: string
+        shippingFee:
+          type: number
+        inspectionBookingFee:
+          type: number
 
     ChatRoom:
       type: object
@@ -1859,3 +2085,157 @@ components:
         car:
           $ref: "#/components/schemas/Car"
       required: [id, orderId, userId, carId, reportNumber, inspector, inspectorTitle, inspectionDate, inspectionTime, address, status, createdAt]
+
+    InspectionBooking:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        preferredDate:
+          type: string
+        preferredTime:
+          type: string
+        inspectionType:
+          type: string
+        fee:
+          type: number
+        status:
+          type: string
+        paymentStatus:
+          type: string
+        transactionId:
+          type: ["string", "null"]
+        cardLast4:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, userId, preferredDate, preferredTime, inspectionType, fee, status, paymentStatus, createdAt]
+
+    InspectionBookingInput:
+      type: object
+      properties:
+        preferredDate:
+          type: string
+        preferredTime:
+          type: string
+        inspectionType:
+          type: string
+        notes:
+          type: string
+        cardLast4:
+          type: string
+      required: [preferredDate, preferredTime, inspectionType]
+
+    AuctionBid:
+      type: object
+      properties:
+        id:
+          type: integer
+        auctionId:
+          type: integer
+        userId:
+          type: integer
+        bidAmount:
+          type: number
+        createdAt:
+          type: string
+        userName:
+          type: string
+        userEmail:
+          type: ["string", "null"]
+      required: [id, auctionId, userId, bidAmount, createdAt, userName]
+
+    AuctionBidInput:
+      type: object
+      properties:
+        bidAmount:
+          type: number
+      required: [bidAmount]
+
+    AuctionDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        carId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        startingPrice:
+          type: number
+        currentBid:
+          type: ["number", "null"]
+        reservePrice:
+          type: ["number", "null"]
+        buyNowPrice:
+          type: ["number", "null"]
+        endAt:
+          type: string
+        status:
+          type: string
+        createdBy:
+          type: integer
+        winnerId:
+          type: ["integer", "null"]
+        winnerBid:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+        car:
+          $ref: "#/components/schemas/Car"
+        bids:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuctionBid"
+        bidCount:
+          type: integer
+        timeRemaining:
+          type: integer
+      required: [id, carId, title, startingPrice, endAt, status, createdBy, createdAt, bids, bidCount, timeRemaining]
+
+    AuctionInput:
+      type: object
+      properties:
+        carId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        startingPrice:
+          type: number
+        reservePrice:
+          type: number
+        buyNowPrice:
+          type: number
+        durationHours:
+          type: number
+      required: [carId, title, startingPrice, durationHours]
+
+    AuctionUpdate:
+      type: object
+      properties:
+        startingPrice:
+          type: number
+        reservePrice:
+          type: number
+        buyNowPrice:
+          type: number
+        status:
+          type: string
+        endAt:
+          type: string
+
+    InspectionBookingUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+        notes:
+          type: string

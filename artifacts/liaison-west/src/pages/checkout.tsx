@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { Layout } from "@/components/layout";
 import { useAuth } from "@/hooks/use-auth";
 import {
-  useGetCart, getGetCartQueryKey, useCreateOrder, useCalculateLoan
+  useGetCart, getGetCartQueryKey, useCreateOrder, useCalculateLoan,
+  useGetPublicSiteSettings,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   ShieldCheck, Lock, CheckCircle2, CreditCard, Landmark,
-  Bitcoin, ChevronRight, AlertCircle, Loader2, BadgeCheck
+  Bitcoin, ChevronRight, AlertCircle, Loader2, BadgeCheck,
+  Truck, Store, MapPin, Package
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -70,6 +72,12 @@ export default function Checkout() {
     }
   }, [authLoading, user, setLocation]);
 
+  // Delivery/pickup
+  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const { data: siteSettings } = useGetPublicSiteSettings({ query: { queryKey: ["public-site-settings"] } });
+  const shippingFee = deliveryMethod === "delivery" ? (siteSettings?.shippingFee ?? 499) : 0;
+
   const [paymentChoice, setPaymentChoice] = useState<PaymentChoice>("full");
   const [paymentGroup, setPaymentGroup] = useState<PaymentGroup>("card");
   const [digitalMethod, setDigitalMethod] = useState<DigitalMethod>("paypal");
@@ -112,7 +120,8 @@ export default function Checkout() {
     },
   });
 
-  const totalAmount = cart?.totalPrice || 0;
+  const cartBaseAmount = cart?.totalPrice || 0;
+  const totalAmount = cartBaseAmount + shippingFee;
   const downPaymentPct = parseFloat(creditCheck.downPaymentPct) / 100 || 0.2;
   const downPayment = totalAmount * downPaymentPct;
   const termMonths = parseInt(creditCheck.termMonths) || 60;
@@ -166,6 +175,11 @@ export default function Checkout() {
       return;
     }
 
+    if (deliveryMethod === "delivery" && !deliveryAddress.trim()) {
+      toast.error("Please enter your delivery address.");
+      return;
+    }
+
     createOrderMutation.mutate({
       data: {
         carId: item.carId,
@@ -174,6 +188,8 @@ export default function Checkout() {
         termMonths: paymentChoice === "installment" ? termMonths : undefined,
         cardLast4: paymentGroup === "card" ? card.number.replace(/\s/g, "").slice(-4) : paymentGroup,
         cardBrand: paymentGroup === "card" ? detectCardBrand(card.number) : paymentGroup,
+        deliveryMethod,
+        shippingFee: shippingFee > 0 ? shippingFee : undefined,
       },
     });
   };
@@ -263,10 +279,67 @@ export default function Checkout() {
           {/* ─── LEFT COLUMN ─── */}
           <div className="space-y-6">
 
-            {/* STEP 1: Payment choice */}
+            {/* STEP 1: Delivery / Pickup */}
             <section className="bg-white/[0.02] border border-white/8 rounded-2xl p-6">
               <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-white text-black text-xs font-bold flex items-center justify-center">1</span>
+                How would you like to receive your vehicle?
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <button
+                  onClick={() => setDeliveryMethod("pickup")}
+                  className={`text-left p-5 rounded-xl border-2 transition-all ${
+                    deliveryMethod === "pickup"
+                      ? "border-white bg-white/5"
+                      : "border-white/10 hover:border-white/25"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <Store className="w-6 h-6 text-white/60" />
+                    {deliveryMethod === "pickup" && <BadgeCheck className="w-5 h-5 text-emerald-400" />}
+                  </div>
+                  <p className="text-white font-bold mb-1">Dealership Pickup</p>
+                  <p className="text-white/40 text-xs">Collect your vehicle from our Beverly Hills showroom.</p>
+                  <p className="text-emerald-400 text-sm font-semibold mt-2">Free</p>
+                </button>
+
+                <button
+                  onClick={() => setDeliveryMethod("delivery")}
+                  className={`text-left p-5 rounded-xl border-2 transition-all ${
+                    deliveryMethod === "delivery"
+                      ? "border-white bg-white/5"
+                      : "border-white/10 hover:border-white/25"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <Truck className="w-6 h-6 text-white/60" />
+                    {deliveryMethod === "delivery" && <BadgeCheck className="w-5 h-5 text-emerald-400" />}
+                  </div>
+                  <p className="text-white font-bold mb-1">Home Delivery</p>
+                  <p className="text-white/40 text-xs">We deliver directly to your specified address.</p>
+                  <p className="text-white font-semibold text-sm mt-2">+{fmt(siteSettings?.shippingFee ?? 499)}</p>
+                </button>
+              </div>
+
+              {deliveryMethod === "delivery" && (
+                <div>
+                  <Label className="text-white/50 text-xs tracking-wider uppercase font-semibold mb-2 flex items-center gap-1.5">
+                    <MapPin className="w-3 h-3" /> Delivery Address
+                  </Label>
+                  <Input
+                    placeholder="123 Rodeo Dr, Beverly Hills, CA 90210"
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    className="h-11 bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl"
+                  />
+                </div>
+              )}
+            </section>
+
+            {/* STEP 2: Payment choice */}
+            <section className="bg-white/[0.02] border border-white/8 rounded-2xl p-6">
+              <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-white text-black text-xs font-bold flex items-center justify-center">2</span>
                 How would you like to pay?
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -308,11 +381,11 @@ export default function Checkout() {
               </div>
             </section>
 
-            {/* STEP 2: Credit Check (only for installment) */}
+            {/* STEP 3: Credit Check (only for installment) */}
             {paymentChoice === "installment" && (
               <section className="bg-white/[0.02] border border-white/8 rounded-2xl p-6">
                 <h2 className="text-white font-bold text-lg mb-1 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-white text-black text-xs font-bold flex items-center justify-center">2</span>
+                  <span className="w-6 h-6 rounded-full bg-white text-black text-xs font-bold flex items-center justify-center">3</span>
                   Credit & Identity Check
                 </h2>
                 <p className="text-white/40 text-sm mb-6 ml-8">We run a soft pull — this will not affect your credit score.</p>
@@ -488,7 +561,7 @@ export default function Checkout() {
               </section>
             )}
 
-            {/* STEP 3: Payment Method */}
+            {/* STEP 4: Payment Method */}
             <section className="bg-white/[0.02] border border-white/8 rounded-2xl p-6">
               <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-white text-black text-xs font-bold flex items-center justify-center">
@@ -715,8 +788,20 @@ export default function Checkout() {
               <div className="border-t border-white/8 pt-4 space-y-2.5 text-sm">
                 <div className="flex justify-between text-white/40">
                   <span>Vehicle Price</span>
-                  <span>{fmt(totalAmount)}</span>
+                  <span>{fmt(cartBaseAmount)}</span>
                 </div>
+                {shippingFee > 0 && (
+                  <div className="flex justify-between text-white/40">
+                    <span className="flex items-center gap-1.5"><Truck className="w-3 h-3" />Home Delivery</span>
+                    <span>+{fmt(shippingFee)}</span>
+                  </div>
+                )}
+                {deliveryMethod === "pickup" && (
+                  <div className="flex justify-between text-white/40">
+                    <span className="flex items-center gap-1.5"><Store className="w-3 h-3" />Dealership Pickup</span>
+                    <span className="text-emerald-400">Free</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-white/40">
                   <span>Processing Fee</span>
                   <span>Included</span>

@@ -16,5 +16,7 @@ export interface SiteSettings {
   conciergeHours: string;
   supportPhone: string;
   supportEmail: string;
+  shippingFee: number;
+  inspectionBookingFee: number;
   updatedAt: string;
 }

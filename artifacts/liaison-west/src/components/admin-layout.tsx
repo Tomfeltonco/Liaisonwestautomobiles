@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Layout } from "@/components/layout";
 import {
   LayoutDashboard, Car, Users, Briefcase, ShoppingCart,
-  FileText, Settings, LogOut, MessageSquare, Contact
+  FileText, Settings, LogOut, MessageSquare, Contact, Gavel, ClipboardList
 } from "lucide-react";
 
 export function AdminLayout({ children, title }: { children: React.ReactNode; title: string }) {
@@ -29,6 +29,8 @@ export function AdminLayout({ children, title }: { children: React.ReactNode; ti
     { href: "/admin/orders", icon: <ShoppingCart className="w-5 h-5" />, label: "Orders" },
     { href: "/admin/loans", icon: <FileText className="w-5 h-5" />, label: "Loans" },
     { href: "/admin/chat", icon: <MessageSquare className="w-5 h-5" />, label: "Chat Support" },
+    { href: "/admin/auctions", icon: <Gavel className="w-5 h-5" />, label: "Auctions" },
+    { href: "/admin/inspection-bookings", icon: <ClipboardList className="w-5 h-5" />, label: "Inspections" },
     { href: "/admin/settings", icon: <Contact className="w-5 h-5" />, label: "Contacts" },
     { href: "/admin/payment-settings", icon: <Settings className="w-5 h-5" />, label: "Payment" },
   ];

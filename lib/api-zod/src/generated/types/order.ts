@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Car } from './car';
+import type { OrderDeliveryMethod } from './orderDeliveryMethod';
 import type { OrderPaymentStatus } from './orderPaymentStatus';
 import type { OrderPaymentType } from './orderPaymentType';
 import type { OrderStatus } from './orderStatus';
@@ -27,5 +28,9 @@ export interface Order {
   paymentStatus: OrderPaymentStatus;
   /** @nullable */
   transactionId?: string | null;
+  deliveryMethod: OrderDeliveryMethod;
+  /** @nullable */
+  deliveryAddress?: string | null;
+  shippingFee: number;
   createdAt: string;
 }

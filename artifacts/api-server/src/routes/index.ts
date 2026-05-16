@@ -10,6 +10,8 @@ import ordersRouter from "./orders";
 import adminRouter from "./admin";
 import chatRouter from "./chat";
 import inspectionsRouter from "./inspections";
+import inspectionBookingsRouter from "./inspection-bookings";
+import auctionRouter from "./auction";
 
 const router: IRouter = Router();
 
@@ -24,5 +26,7 @@ router.use("/orders", ordersRouter);
 router.use("/admin", adminRouter);
 router.use("/chat", chatRouter);
 router.use("/inspections", inspectionsRouter);
+router.use("/inspection-bookings", inspectionBookingsRouter);
+router.use("/auctions", auctionRouter);
 
 export default router;

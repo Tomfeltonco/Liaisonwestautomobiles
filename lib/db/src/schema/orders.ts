@@ -16,6 +16,9 @@ export const ordersTable = pgTable("orders", {
   transactionId: text("transaction_id"),
   cardLast4: text("card_last4"),
   cardBrand: text("card_brand"),
+  deliveryMethod: text("delivery_method").notNull().default("pickup"),
+  deliveryAddress: text("delivery_address"),
+  shippingFee: real("shipping_fee").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

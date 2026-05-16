@@ -31,9 +31,9 @@ router.get("/", requireAuth, requireRole("admin"), async (req, res) => {
 // POST /api/orders
 router.post("/", requireAuth, async (req, res) => {
   try {
-    const { carId, paymentType, downPayment, termMonths, cardLast4, cardBrand } = req.body as {
+    const { carId, paymentType, downPayment, termMonths, cardLast4, cardBrand, deliveryMethod, shippingFee } = req.body as {
       carId: number; paymentType: string; downPayment?: number; termMonths?: number;
-      cardLast4?: string; cardBrand?: string;
+      cardLast4?: string; cardBrand?: string; deliveryMethod?: string; shippingFee?: number;
     };
 
     const [car] = await db.select().from(carsTable).where(eq(carsTable.id, carId)).limit(1);
@@ -57,11 +57,12 @@ router.post("/", requireAuth, async (req, res) => {
 
     const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
+    const fee = shippingFee ?? 0;
     const [order] = await db.insert(ordersTable).values({
       userId: req.user!.id,
       carId,
       paymentType,
-      totalAmount: car.price,
+      totalAmount: car.price + fee,
       downPayment: downPayment ?? null,
       monthlyPayment: monthlyPayment ?? null,
       termMonths: termMonths ?? null,
@@ -70,6 +71,8 @@ router.post("/", requireAuth, async (req, res) => {
       transactionId,
       cardLast4: cardLast4 ?? null,
       cardBrand: cardBrand ?? null,
+      deliveryMethod: deliveryMethod ?? "pickup",
+      shippingFee: fee,
     }).returning();
 
     if (paymentType === "full") {
@@ -139,7 +142,7 @@ router.get("/:id", requireAuth, async (req, res) => {
   }
 });
 
-// PATCH /api/orders/:id
+// PATCH /api/orders/:id — admin updates status
 router.patch("/:id", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -153,6 +156,29 @@ router.patch("/:id", requireAuth, requireRole("admin"), async (req, res) => {
     res.json(await enrichOrder(updated));
   } catch (err) {
     req.log.error({ err }, "Update order error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PATCH /api/orders/:id/delivery — user sets delivery method + address
+router.patch("/:id/delivery", requireAuth, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { deliveryMethod, deliveryAddress } = req.body as {
+      deliveryMethod: string; deliveryAddress?: string;
+    };
+    const [existing] = await db.select().from(ordersTable).where(eq(ordersTable.id, id)).limit(1);
+    if (!existing) { res.status(404).json({ error: "Order not found" }); return; }
+    if (existing.userId !== req.user!.id && req.user!.role !== "admin") {
+      res.status(403).json({ error: "Forbidden" }); return;
+    }
+    const [updated] = await db.update(ordersTable)
+      .set({ deliveryMethod, deliveryAddress: deliveryAddress ?? null })
+      .where(eq(ordersTable.id, id))
+      .returning();
+    res.json(await enrichOrder(updated));
+  } catch (err) {
+    req.log.error({ err }, "Update delivery error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

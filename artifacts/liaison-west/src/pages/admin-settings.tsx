@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { Phone, Mail, MapPin, Clock, User, Save, Loader2 } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, User, Save, Loader2, Truck, Wrench } from "lucide-react";
 
 export default function AdminSettings() {
   const qc = useQueryClient();
@@ -24,6 +24,8 @@ export default function AdminSettings() {
     conciergeHours: "",
     supportPhone: "",
     supportEmail: "",
+    shippingFee: "499",
+    inspectionBookingFee: "299",
   });
 
   useEffect(() => {
@@ -36,6 +38,8 @@ export default function AdminSettings() {
       conciergeHours: settings.conciergeHours,
       supportPhone: settings.supportPhone,
       supportEmail: settings.supportEmail,
+      shippingFee: String(settings.shippingFee ?? 499),
+      inspectionBookingFee: String(settings.inspectionBookingFee ?? 299),
     });
   }, [settings]);
 
@@ -50,7 +54,13 @@ export default function AdminSettings() {
   });
 
   const handleSave = () => {
-    updateMutation.mutate({ data: form });
+    updateMutation.mutate({
+      data: {
+        ...form,
+        shippingFee: parseFloat(form.shippingFee) || 499,
+        inspectionBookingFee: parseFloat(form.inspectionBookingFee) || 299,
+      },
+    });
   };
 
   const field = (
@@ -127,6 +137,48 @@ export default function AdminSettings() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {field("Support Phone", "supportPhone", "+1 (310) 555-0100", <Phone className="w-3 h-3" />)}
               {field("Support Email", "supportEmail", "support@liaisonwest.com", <Mail className="w-3 h-3" />)}
+            </div>
+          </section>
+
+          {/* Service Fees */}
+          <section className="bg-white/[0.02] border border-white/8 rounded-2xl p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-white font-bold text-xl">Service Fees</h2>
+                <p className="text-white/40 text-sm mt-1">Fees charged to customers for delivery and inspection services.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <Label className="text-white/50 text-xs uppercase tracking-wider font-semibold mb-2 flex items-center gap-1.5">
+                  <Truck className="w-3 h-3" /> Delivery / Shipping Fee ($)
+                </Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={form.shippingFee}
+                  onChange={(e) => setForm({ ...form, shippingFee: e.target.value })}
+                  placeholder="499"
+                  className="h-11 bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl"
+                />
+                <p className="text-white/30 text-xs mt-1.5">Added to order total when customer selects home delivery.</p>
+              </div>
+              <div>
+                <Label className="text-white/50 text-xs uppercase tracking-wider font-semibold mb-2 flex items-center gap-1.5">
+                  <Wrench className="w-3 h-3" /> Standard Inspection Fee ($)
+                </Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={form.inspectionBookingFee}
+                  onChange={(e) => setForm({ ...form, inspectionBookingFee: e.target.value })}
+                  placeholder="299"
+                  className="h-11 bg-white/5 border-white/10 text-white placeholder:text-white/20 rounded-xl"
+                />
+                <p className="text-white/30 text-xs mt-1.5">Base fee for standard inspection; premium is 2×.</p>
+              </div>
             </div>
           </section>
 
