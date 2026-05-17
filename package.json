@@ -3,18 +3,22 @@
   "name": "workspace",
   "version": "0.0.0",
   "engines": {
-  "node": ">=20"
-},
+    "node": ">=20"
+  },
   "license": "MIT",
   "scripts": {
-  "start": "node server.js",
+    "start": "node server.js",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
   "private": true,
   "devDependencies": {
+    "@types/node": "^25.8.0",
+    "drizzle-orm": "^0.45.2",
+    "drizzle-zod": "^0.8.3",
     "prettier": "^3.8.3",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "zod": "^4.4.3"
   }
 }
